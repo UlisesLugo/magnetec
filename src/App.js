@@ -25,11 +25,12 @@ function App() {
     //scene.add(cube);
 
     /////// TEST PARTICLE /////////
-    const geometry = new THREE.SphereGeometry(1, 100, 100);
+    const geometry = new THREE.SphereGeometry(0.2, 100, 100);
     const material = new THREE.MeshBasicMaterial({color: "gray", wireframe: false, side: THREE.DoubleSide});
-    let obj = new Particle(geometry, material);
-    let mesh = obj.object;
-    scene.add(mesh);
+    let particle = new Particle(geometry, material);
+    let meshParticle = particle.object;
+    meshParticle.position.y = 5;
+    scene.add(meshParticle);
     ///////////////////////////////
 
     camera.position.z = 5;
@@ -37,6 +38,15 @@ function App() {
       requestAnimationFrame(animate);
       //cube.rotation.x += 0.01;
       //cube.rotation.y += 0.01;
+      particle.setPosition(
+        (particle.getXPosition() + particle.xF), 
+        (particle.getYPosition() + particle.yF), 
+        (particle.getZPosition() + particle.zF));
+
+      if (particle.getYPosition() <= 0){
+        particle.yF = 0;
+      } 
+        
       renderer.render(scene, camera);
     };
     animate();

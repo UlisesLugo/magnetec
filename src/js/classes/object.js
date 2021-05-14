@@ -9,4 +9,13 @@ export default class Object {
     setPosition(posX, posY, posZ){
         this.object.position.set(posX, posY, posZ);
     }
+    getXPosition(){
+        return this.object.position.x;
+    }
+    getYPosition(){
+        return this.object.position.y;
+    }
+    getZPosition(){
+        return this.object.position.z;
+    }
 }
