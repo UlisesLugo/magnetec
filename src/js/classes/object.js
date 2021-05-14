@@ -1,4 +1,6 @@
-class Object {
+import * as THREE from "three";
+
+export default class Object {
     constructor(geometry, material){
         this.geometry = geometry;
         this.material = material;
