@@ -25,28 +25,30 @@ function App() {
     //scene.add(cube);
 
     /////// TEST PARTICLE /////////
-    const geometry = new THREE.SphereGeometry(0.2, 100, 100);
+    const geometry = new THREE.SphereGeometry(0.1, 100, 100);
     const material = new THREE.MeshBasicMaterial({color: "gray", wireframe: false, side: THREE.DoubleSide});
     let particle = new Particle(geometry, material);
     let meshParticle = particle.object;
-    meshParticle.position.y = 5;
+    meshParticle.position.y = 0;
     scene.add(meshParticle);
     ///////////////////////////////
 
     camera.position.z = 5;
     let animate = function () {
       requestAnimationFrame(animate);
-      //cube.rotation.x += 0.01;
-      //cube.rotation.y += 0.01;
+          
+      // Using lorentz function to calculate forces in x, y and z.
+      // Simulating the change in velocity by adding the force directly to the velocity.
+      particle.xV += particle.lorentzFx(0, 0, 10);
+      particle.yV += particle.lorentzFy(0.001, 0, 0);
+      particle.zV += particle.lorentzFz(0, 10, 0);
+      
+      // Changing particle position
       particle.setPosition(
-        (particle.getXPosition() + particle.xF), 
-        (particle.getYPosition() + particle.yF), 
-        (particle.getZPosition() + particle.zF));
-
-      if (particle.getYPosition() <= 0){
-        particle.yF = 0;
-      } 
-        
+          (particle.getXPosition() + particle.xV), 
+          (particle.getYPosition() + particle.yV), 
+          (particle.getZPosition() + particle.zV)); 
+      
       renderer.render(scene, camera);
     };
     animate();
