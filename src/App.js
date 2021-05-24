@@ -1,7 +1,8 @@
 import "./App.scss";
 import * as THREE from "three";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Particle from "./js/classes/particle.js";
+import tweakpane from "tweakpane";
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
@@ -96,6 +97,31 @@ const SpinningMesh = ({ position, args, color, speed }) => {
 };
 
 function App() {
+  // useEffect(() => {
+  //   const pane = new tweakpane();
+  //   const guiData = {
+  //     particlesCount: 1,
+  //   };
+
+  //   const particlesFolder = pane.addFolder({
+  //     title: "Agregar particulas",
+  //   });
+  //   particlesFolder.addInput(guiData, "particlesCount", {
+  //     min: 1,
+  //     max: 20,
+  //     label: "Cantidad",
+  //   });
+  //   particlesFolder
+  //     .addButton({
+  //       title: "Agregar a escena",
+  //     })
+  //     .on("click", () => {
+  //       console.log("Added ", guiData.particlesCount, " particles");
+  //     });
+  //   return () => {
+  //     pane.dispose();
+  //   };
+  // }, []);
   return (
     <>
       <Canvas
