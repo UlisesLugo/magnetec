@@ -1,6 +1,6 @@
 import {Vec3d} from '../utils/utils';
 
-const U_NOT = 10;
+const U_NOT = 4 * Math.PI * 1e-7;
 
 class MagneticMomentVector{
     // scheme: https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/3D_Spherical.svg/1200px-3D_Spherical.svg.png
