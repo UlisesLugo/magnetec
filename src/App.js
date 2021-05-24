@@ -61,11 +61,22 @@ const prevLogic = () => {
   animate();
 };
 
-const ParticleComponent = ({ position, args, color, speed }) => {
+const ParticleComponent = ({ position, args, color, speed, q}) => {
   let particle = new Particle();
   const mesh = useRef(null);
   useFrame(() => {
-    mesh.current.position.x += 0.01;
+
+    let xF = particle.lorentzFx2(0, 0, 1, speed[1], speed[2], q);
+    let yF = particle.lorentzFy2(0, 0, 0, speed[2], speed[0], q);
+    let zF = particle.lorentzFz2(0, 1, 0, speed[0], speed[1], q);
+
+    speed[0] += xF;
+    speed[1] += yF;
+    speed[2] += zF;
+
+    mesh.current.position.x += speed[0];
+    mesh.current.position.y += speed[1];
+    mesh.current.position.z += speed[2];
     return true;
   });
 
@@ -131,10 +142,12 @@ function App() {
 
           <ParticleComponent
             position={[0, 1, 0]}
-            args={[2, 100, 100]}
+            args={[0.2, 100, 100]}
             color="lightblue"
-            speed={2}
+            speed={[0.01, 0.01, 0.01]}
+            q={0.01}
           />
+          {/* 
           <ParticleComponent
             position={[-2, 1, 2]}
             args={[1, 100, 100]}
@@ -147,6 +160,7 @@ function App() {
             color="pink"
             speed={6}
           />
+          */}
         </group>
         <OrbitControls />
       </Canvas>
