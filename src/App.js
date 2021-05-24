@@ -5,14 +5,8 @@ import Particle from "./js/classes/particle.js";
 import tweakpane from "tweakpane";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import {
-  softShadows,
-  MeshWobbleMaterial,
-  OrbitControls,
-} from "@react-three/drei";
+import { MeshWobbleMaterial, OrbitControls } from "@react-three/drei";
 import { useSpring, a } from "react-spring/three";
-
-softShadows();
 
 const prevLogic = () => {
   let scene = new THREE.Scene();
@@ -67,9 +61,13 @@ const prevLogic = () => {
   animate();
 };
 
-const SpinningMesh = ({ position, args, color, speed }) => {
+const ParticleComponent = ({ position, args, color, speed }) => {
+  let particle = new Particle();
   const mesh = useRef(null);
-  useFrame(() => (mesh.current.rotation.x = mesh.current.rotation.y += 0.01));
+  useFrame(() => {
+    mesh.current.position.x += 0.01;
+    return true;
+  });
 
   const [expand, setExpand] = useState(false);
 
@@ -85,13 +83,8 @@ const SpinningMesh = ({ position, args, color, speed }) => {
       ref={mesh}
       position={position}
     >
-      <boxBufferGeometry attach="geometry" args={args} />
-      <MeshWobbleMaterial
-        attach="material"
-        color={color}
-        speed={speed}
-        factor={0.6}
-      />
+      <sphereBufferGeometry attach="geometry" args={args} />
+      <meshStandardMaterial attach="material" color={color} />
     </a.mesh>
   );
 };
@@ -124,46 +117,36 @@ function App() {
   // }, []);
   return (
     <>
-      <Canvas
-        shadowMap
-        colorManagement
-        camera={{ position: [-5, 2, 10], fov: 60 }}
-      >
+      <Canvas colorManagement camera={{ position: [-5, 2, 10], fov: 60 }}>
         <ambientLight intensity={0.3} />
-        <directionalLight
-          castShadow
-          position={[0, 10, 0]}
-          intensity={1.5}
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-          shadow-camera-far={50}
-          shadow-camera-left={-10}
-          shadow-camera-right={10}
-          shadow-camera-top={10}
-          shadow-camera-bottom={-10}
-        />
         <pointLight position={[-10, 0, -20]} intensity={0.5} />
         <pointLight position={[0, -10, 0]} intensity={1.5} />
 
         <group>
-          <mesh
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[0, -3, 0]}
-            receiveShadow
-          >
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3, 0]}>
             <planeBufferGeometry attach="geometry" args={[100, 100]} />
             {/* <shadowMaterial attach="material" opacity={0.3} /> */}
-            <meshStandardMaterial attach="material" color="yellow" />
+            <meshStandardMaterial attach="material" color="lightgray" />
           </mesh>
 
-          <SpinningMesh
+          <ParticleComponent
             position={[0, 1, 0]}
-            args={[3, 2, 1]}
+            args={[2, 100, 100]}
             color="lightblue"
             speed={2}
           />
-          <SpinningMesh position={[-2, 1, -5]} color="pink" speed={6} />
-          <SpinningMesh position={[5, 1, -2]} color="pink" speed={6} />
+          <ParticleComponent
+            position={[-2, 1, 2]}
+            args={[1, 100, 100]}
+            color="pink"
+            speed={6}
+          />
+          <ParticleComponent
+            position={[2, 1, -2]}
+            args={[1, 100, 100]}
+            color="pink"
+            speed={6}
+          />
         </group>
         <OrbitControls />
       </Canvas>
