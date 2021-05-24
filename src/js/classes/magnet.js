@@ -42,23 +42,24 @@ class MagneticMomentVector{
 }
 
 class Magnet extends Object {
-    constructor(phi, tetha, magnitude){
+    constructor(phi, tetha, magnitude, x, y, z){
         let geometry = new THREE.BoxGeometry(1);
         let material = new THREE.MeshPhongMaterial({color: "red"});
         super(geometry, material);
-        this.magneticMomentVector = MagneticMomentVector(phi, tetha, magnitude);
-        this.setPosition(0, 0, 0);
+        this.magneticMomentVector = MagneticMomentVector(phi, tetha, magnitude, x, y, z);
+        this.setPosition(x, y, z);
     }
 
     setPhiTethaMagnitude(phi, tetha, magnitude){
         this.magneticMomentVector.setPhiTethaMagnitude(phi, tetha, magnitude);
     }
+    setPosition(x, y, z){
+        super(); // or something
+        this.magneticMomentVector.setStartPosition(x, y, z);
+    }
 
-    getForceVectorAtPosition(posX, posY, posZ){
-        fx = posX;
-        fy = posY;
-        fz = posZ;
-        return posZ;
+    getForceVectorAtPosition(x, y, z, q, vel){
+        return this.magneticMomentVector.magneticForceAtCharge(x, y, z, q, vel);
     }
 
 
