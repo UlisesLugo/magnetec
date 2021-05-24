@@ -61,14 +61,23 @@ const prevLogic = () => {
   animate();
 };
 
+let particles = []
+
 const ParticleComponent = ({ position, args, color, speed, q}) => {
   let particle = new Particle();
+  particles.push(particle);
   const mesh = useRef(null);
   useFrame(() => {
 
     let xF = particle.lorentzFx2(0, 0, 1, speed[1], speed[2], q);
     let yF = particle.lorentzFy2(0, 0, 0, speed[2], speed[0], q);
     let zF = particle.lorentzFz2(0, 1, 0, speed[0], speed[1], q);
+
+    for (var i = 0; i < particles.length; i++){
+      if (particles[i] !== particle){
+        console.log("repulsion function here");
+      }
+    }
 
     speed[0] += xF;
     speed[1] += yF;
@@ -147,6 +156,13 @@ function App() {
             speed={[0.01, 0.01, 0.01]}
             q={0.01}
           />
+          <ParticleComponent
+            position={[2, 1, 0]}
+            args={[0.2, 100, 100]}
+            color="red"
+            speed={[-0.01, 0.01, -0.01]}
+            q={0.01}
+          />
           {/* 
           <ParticleComponent
             position={[-2, 1, 2]}
@@ -154,6 +170,7 @@ function App() {
             color="pink"
             speed={6}
           />
+          
           <ParticleComponent
             position={[2, 1, -2]}
             args={[1, 100, 100]}
@@ -161,6 +178,7 @@ function App() {
             speed={6}
           />
           */}
+          
         </group>
         <OrbitControls />
       </Canvas>
