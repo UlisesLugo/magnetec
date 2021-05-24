@@ -43,7 +43,7 @@ class MagneticMomentVector{
 
 class Magnet extends Object {
     constructor(phi, tetha, magnitude, x, y, z){
-        let geometry = new THREE.BoxGeometry(1);
+        let geometry = new new THREE.SphereGeometry(0.1, 100, 100);
         let material = new THREE.MeshPhongMaterial({color: "red"});
         super(geometry, material);
         this.magneticMomentVector = MagneticMomentVector(phi, tetha, magnitude, x, y, z);
