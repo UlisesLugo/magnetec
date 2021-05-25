@@ -65,7 +65,7 @@ const ParticleComponent = ({ position, args, color, speed }) => {
   let particle = new Particle();
   const mesh = useRef(null);
   useFrame(() => {
-    mesh.current.position.x += 0.01;
+    mesh.current.rotation.x += 0.01;
     return true;
   });
 
@@ -131,19 +131,19 @@ function App() {
 
           <ParticleComponent
             position={[0, 1, 0]}
-            args={[2, 100, 100]}
+            args={[1.5, 20, 20]}
             color="lightblue"
             speed={2}
           />
           <ParticleComponent
             position={[-2, 1, 2]}
-            args={[1, 100, 100]}
+            args={[1, 20, 20]}
             color="pink"
             speed={6}
           />
           <ParticleComponent
             position={[2, 1, -2]}
-            args={[1, 100, 100]}
+            args={[1, 20, 20]}
             color="pink"
             speed={6}
           />
