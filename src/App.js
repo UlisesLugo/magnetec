@@ -2,11 +2,12 @@ import "./App.scss";
 import * as THREE from "three";
 import { useEffect, useRef, useState } from "react";
 import Particle from "./js/classes/particle.js";
-import tweakpane from "tweakpane";
+import { useTweaks } from "use-tweaks";
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { MeshWobbleMaterial, OrbitControls } from "@react-three/drei";
 import { useSpring, a } from "react-spring/three";
+import Magnet from "./js/classes/magnet.js";
 
 const prevLogic = () => {
   let scene = new THREE.Scene();
@@ -61,11 +62,31 @@ const prevLogic = () => {
   animate();
 };
 
-const ParticleComponent = ({ position, args, color, speed }) => {
+let particles = [];
+let magnets = [];
+
+const ParticleComponent = ({ position, args, color, speed, q }) => {
   let particle = new Particle();
+  particles.push(particle);
   const mesh = useRef(null);
   useFrame(() => {
-    mesh.current.rotation.x += 0.01;
+    let xF = particle.lorentzFx2(0, 0, 1, speed[1], speed[2], q);
+    let yF = particle.lorentzFy2(0, 0, 0, speed[2], speed[0], q);
+    let zF = particle.lorentzFz2(0, 1, 0, speed[0], speed[1], q);
+
+    for (var i = 0; i < particles.length; i++) {
+      if (particles[i] !== particle) {
+        console.log("repulsion function here");
+      }
+    }
+
+    speed[0] += xF;
+    speed[1] += yF;
+    speed[2] += zF;
+
+    mesh.current.position.x += speed[0];
+    mesh.current.position.y += speed[1];
+    mesh.current.position.z += speed[2];
     return true;
   });
 
@@ -89,7 +110,59 @@ const ParticleComponent = ({ position, args, color, speed }) => {
   );
 };
 
+const MagnetComponent = ({ position, args, color }) => {
+  let magnet = new Magnet();
+  magnets.push(magnet);
+  const mesh = useRef(null);
+  useFrame(() => {
+    //   let xF = particle.lorentzFx2(0, 0, 1, speed[1], speed[2], q);
+    //   let yF = particle.lorentzFy2(0, 0, 0, speed[2], speed[0], q);
+    //   let zF = particle.lorentzFz2(0, 1, 0, speed[0], speed[1], q);
+    //   for (var i = 0; i < particles.length; i++){
+    //     if (particles[i] !== particle){
+    //       console.log("repulsion function here");
+    //     }
+    //   }
+    //   speed[0] += xF;
+    //   speed[1] += yF;
+    //   speed[2] += zF;
+    //   mesh.current.position.x += speed[0];
+    //   mesh.current.position.y += speed[1];
+    //   mesh.current.position.z += speed[2];
+    //   return true;
+  });
+
+  const [expand, setExpand] = useState(false);
+
+  const props = useSpring({
+    scale: expand ? [1.4, 1.4, 1.4] : [1, 1, 1],
+  });
+
+  return (
+    <a.mesh
+      onClick={() => setExpand(!expand)}
+      scale={props.scale}
+      castShadow
+      ref={mesh}
+      position={position}
+    >
+      <sphereBufferGeometry attach="geometry" args={args} />
+      <meshStandardMaterial attach="material" color={color} />
+    </a.mesh>
+  );
+};
+
 function App() {
+  const type = useTweaks("Agregar Particulas", {
+    text: "poimandres",
+    color: "#fff",
+    fontSize: { value: 175, min: 150, max: 250 },
+    letterSpacing: "-0.08em",
+    lineHeight: "0.75em",
+    fontStyle: "italic",
+    "--var-weight": { min: 100, max: 900, value: 600 },
+    "--var-slant": { min: -10, max: 0, value: 0 },
+  });
   // useEffect(() => {
   //   const pane = new tweakpane();
   //   const guiData = {
@@ -133,20 +206,37 @@ function App() {
             position={[0, 1, 0]}
             args={[1.5, 20, 20]}
             color="lightblue"
-            speed={2}
+            speed={[0.01, 0.01, 0.01]}
+            q={0.01}
           />
+          <ParticleComponent
+            position={[2, 1, 0]}
+            args={[0.2, 100, 100]}
+            color="red"
+            speed={[-0.01, 0.01, -0.01]}
+            q={0.01}
+          />
+
+          <MagnetComponent
+            position={[2, 1, 0]}
+            args={[0.2, 100, 100]}
+            color="black"
+          />
+          {/* 
           <ParticleComponent
             position={[-2, 1, 2]}
             args={[1, 20, 20]}
             color="pink"
             speed={6}
           />
+          
           <ParticleComponent
             position={[2, 1, -2]}
             args={[1, 20, 20]}
             color="pink"
             speed={6}
           />
+          */}
         </group>
         <OrbitControls />
       </Canvas>
