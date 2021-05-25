@@ -153,17 +153,16 @@ const MagnetComponent = ({ position, args, color }) => {
 };
 
 function App() {
-  const type = useTweaks("Agregar Particulas", {
-    text: "poimandres",
-    color: "#fff",
-    fontSize: { value: 175, min: 150, max: 250 },
-    letterSpacing: "-0.08em",
-    lineHeight: "0.75em",
-    fontStyle: "italic",
-    "--var-weight": { min: 100, max: 900, value: 600 },
-    "--var-slant": { min: -10, max: 0, value: 0 },
-  });
-  // useEffect(() => {
+  // const type = useTweaks("Agregar Particulas", {
+  //   text: "poimandres",
+  //   color: "#fff",
+  //   fontSize: { value: 175, min: 150, max: 250 },
+  //   letterSpacing: "-0.08em",
+  //   lineHeight: "0.75em",
+  //   fontStyle: "italic",
+  //   "--var-weight": { min: 100, max: 900, value: 600 },
+  //   "--var-slant": { min: -10, max: 0, value: 0 },
+  // });
   //   const pane = new tweakpane();
   //   const guiData = {
   //     particlesCount: 1,
