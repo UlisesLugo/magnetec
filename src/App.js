@@ -66,17 +66,17 @@ let particles = [];
 let magnets = [];
 
 const ParticleComponent = ({ position, args, color, speed, q }) => {
-  let particle = new Particle();
+  let particle = new Particle(position[0], position[1], position[2], speed[0], speed[1], speed[2], q);
   particles.push(particle);
   const mesh = useRef(null);
   useFrame(() => {
-    let xF = particle.lorentzFx2(0, 0, 1, speed[1], speed[2], q);
-    let yF = particle.lorentzFy2(0, 0, 0, speed[2], speed[0], q);
-    let zF = particle.lorentzFz2(0, 1, 0, speed[0], speed[1], q);
+    let xF = particle.lorentzFx(0, 0, 1);
+    let yF = particle.lorentzFy(0, 0, 0);
+    let zF = particle.lorentzFz(0, 1, 0);
 
     for (var i = 0; i < particles.length; i++) {
       if (particles[i] !== particle) {
-        console.log("repulsion function here");
+
       }
     }
 
@@ -84,9 +84,17 @@ const ParticleComponent = ({ position, args, color, speed, q }) => {
     speed[1] += yF;
     speed[2] += zF;
 
-    mesh.current.position.x += speed[0];
-    mesh.current.position.y += speed[1];
-    mesh.current.position.z += speed[2];
+    particle.xV = speed[0];
+    particle.yV = speed[1];
+    particle.zV = speed[2];
+
+    mesh.current.position.x += particle.xV;
+    mesh.current.position.y += particle.yV;
+    mesh.current.position.z += particle.zV;
+
+    particle.x = mesh.current.position.x;
+    particle.y = mesh.current.position.y;
+    particle.z = mesh.current.position.z;
     return true;
   });
 
@@ -203,7 +211,7 @@ function App() {
 
           <ParticleComponent
             position={[0, 1, 0]}
-            args={[1.5, 20, 20]}
+            args={[0.2, 100, 100]}
             color="lightblue"
             speed={[0.01, 0.01, 0.01]}
             q={0.01}
@@ -213,12 +221,12 @@ function App() {
             args={[0.2, 100, 100]}
             color="red"
             speed={[-0.01, 0.01, -0.01]}
-            q={0.01}
+            q={0.02}
           />
 
           <MagnetComponent
             position={[2, 1, 0]}
-            args={[0.2, 100, 100]}
+            args={[1.5, 20, 20]}
             color="black"
           />
           {/* 
