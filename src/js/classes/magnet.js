@@ -1,4 +1,5 @@
-import {Vec3d} from '../utils/utils';
+import Vec3d from '../utils/utils.js';
+import Object from './object.js';
 
 const U_NOT = 4 * Math.PI * 1e-7;
 
@@ -36,17 +37,17 @@ class MagneticMomentVector{
     }
 
     magneticForceAtCharge(x, y, z, q, vel){ // vel must be a Vec3d
-        magnetic = this.magneticFieldAtP(x, y, z);
+        let magnetic = this.magneticFieldAtP(x, y, z);
         return vel.mult(q).crossProd(magnetic);
     }
 }
 
-class Magnet extends Object {
+export default class Magnet extends Object {
     constructor(phi, tetha, magnitude, x, y, z){
-        let geometry = new new THREE.SphereGeometry(0.1, 100, 100);
-        let material = new THREE.MeshPhongMaterial({color: "red"});
+        let geometry = 5;//new new THREE.SphereGeometry(0.1, 100, 100);
+        let material = 5;//new THREE.MeshPhongMaterial({color: "red"});
         super(geometry, material);
-        this.magneticMomentVector = MagneticMomentVector(phi, tetha, magnitude, x, y, z);
+        this.magneticMomentVector = new MagneticMomentVector(phi, tetha, magnitude, x, y, z);
         this.setPosition(x, y, z);
     }
 
@@ -54,7 +55,8 @@ class Magnet extends Object {
         this.magneticMomentVector.setPhiTethaMagnitude(phi, tetha, magnitude);
     }
     setPosition(x, y, z){
-        super(); // or something
+        // We have to set the position here
+        // super(); // or something
         this.magneticMomentVector.setStartPosition(x, y, z);
     }
 

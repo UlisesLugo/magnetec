@@ -1,5 +1,5 @@
 
-class Vec3d{
+export default class Vec3d{
     constructor(x, y, z){
         this.vec = [x, y, z];
     }

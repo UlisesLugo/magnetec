@@ -2,6 +2,7 @@ import "./App.scss";
 import * as THREE from "three";
 import { useEffect, useRef, useState } from "react";
 import Particle from "./js/classes/particle.js";
+import Magnet from "./js/classes/magnet.js";
 import tweakpane from "tweakpane";
 
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -62,6 +63,7 @@ const prevLogic = () => {
 };
 
 let particles = []
+let magnets = []
 
 const ParticleComponent = ({ position, args, color, speed, q}) => {
   let particle = new Particle();
@@ -108,6 +110,53 @@ const ParticleComponent = ({ position, args, color, speed, q}) => {
     </a.mesh>
   );
 };
+
+const MagnetComponent = ({ position, args, color}) => {
+  let magnet = new Magnet();
+  magnets.push(magnet);
+  const mesh = useRef(null);
+  useFrame(() => {
+
+  //   let xF = particle.lorentzFx2(0, 0, 1, speed[1], speed[2], q);
+  //   let yF = particle.lorentzFy2(0, 0, 0, speed[2], speed[0], q);
+  //   let zF = particle.lorentzFz2(0, 1, 0, speed[0], speed[1], q);
+
+  //   for (var i = 0; i < particles.length; i++){
+  //     if (particles[i] !== particle){
+  //       console.log("repulsion function here");
+  //     }
+  //   }
+
+  //   speed[0] += xF;
+  //   speed[1] += yF;
+  //   speed[2] += zF;
+
+  //   mesh.current.position.x += speed[0];
+  //   mesh.current.position.y += speed[1];
+  //   mesh.current.position.z += speed[2];
+  //   return true;
+  });
+
+  const [expand, setExpand] = useState(false);
+
+  const props = useSpring({
+    scale: expand ? [1.4, 1.4, 1.4] : [1, 1, 1],
+  });
+
+  return (
+    <a.mesh
+      onClick={() => setExpand(!expand)}
+      scale={props.scale}
+      castShadow
+      ref={mesh}
+      position={position}
+    >
+      <sphereBufferGeometry attach="geometry" args={args} />
+      <meshStandardMaterial attach="material" color={color} />
+    </a.mesh>
+  );
+};
+
 
 function App() {
   // useEffect(() => {
@@ -162,6 +211,12 @@ function App() {
             color="red"
             speed={[-0.01, 0.01, -0.01]}
             q={0.01}
+          />
+
+          <MagnetComponent
+            position={[2, 1, 0]}
+            args={[0.2, 100, 100]}
+            color="black"
           />
           {/* 
           <ParticleComponent
