@@ -25,4 +25,16 @@ export default class Particle extends Object {
     lorentzFz(zE, yB, xB){
         return this.q * (zE + (this.xV * yB) - (this.yV * xB));
     }
+
+    lorentzFx2(xE, zB, yB, yV, zV, q){
+        return q * (xE + (yV * zB) - (zV * yB));
+    }
+
+    lorentzFy2(yE, xB, zB, zV, xV, q){
+        return q * (yE + (zV * xB) - (xV * zB));
+    }
+
+    lorentzFz2(zE, yB, xB, xV, yV, q){
+        return q * (zE + (xV * yB) - (yV * xB));
+    }
 }
