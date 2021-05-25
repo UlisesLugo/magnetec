@@ -74,7 +74,15 @@ const ParticleComponent = ({
   q,
   isPlaying,
 }) => {
-  let particle = new Particle();
+  let particle = new Particle(
+    position[0],
+    position[1],
+    position[2],
+    speed[0],
+    speed[1],
+    speed[2],
+    q
+  );
   particles.push(particle);
   const mesh = useRef(null);
   useFrame(() => {
@@ -191,7 +199,7 @@ function App() {
           <ParticleComponent
             id={1}
             position={[0, 1, 0]}
-            args={[1.5, 20, 20]}
+            args={[0.2, 100, 100]}
             color="lightblue"
             speed={[0.01, 0.01, 0.01]}
             q={0.01}
@@ -203,13 +211,13 @@ function App() {
             args={[0.2, 100, 100]}
             color="red"
             speed={[-0.01, 0.01, -0.01]}
-            q={0.01}
+            q={0.02}
             isPlaying={guiData.playing}
           />
 
           <MagnetComponent
             position={[2, 1, 0]}
-            args={[0.2, 100, 100]}
+            args={[1.5, 20, 20]}
             color="black"
           />
           {/* 

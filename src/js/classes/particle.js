@@ -1,16 +1,19 @@
 import Object from './object.js';
 
 export default class Particle extends Object {
-    constructor(geometry, material) {
-        super(geometry, material);
+    constructor(x, y, z, xV, yV, zV, q) {
+        super();
         console.log("this is a particle");
+        this.x = x;
+        this.y = y;
+        this.z = z;
         this.xF = 0.0; // Force in x
         this.yF = 0.0; // Force in y
         this.zF = 0.0; // Force in z
-        this.xV = 0.1; // Velocity in x
-        this.yV = 0.0; // Velocity in y
-        this.zV = 0.0; // Velocity in z
-        this.q = 0.01; // Particle charge
+        this.xV = xV; // Velocity in x
+        this.yV = yV; // Velocity in y
+        this.zV = zV; // Velocity in z
+        this.q = q; // Particle charge
         this.mass = 1; // Particle mass (useless at the moment)
     }
 
