@@ -9,6 +9,8 @@ import tweakpane from "tweakpane";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { MeshWobbleMaterial, OrbitControls } from "@react-three/drei";
 import { useSpring, a } from "react-spring/three";
+import { Pane } from "tweakpane";
+import Magnet from "./js/classes/magnet.js";
 
 const prevLogic = () => {
   let scene = new THREE.Scene();
@@ -63,41 +65,70 @@ const prevLogic = () => {
   animate();
 };
 
-let particles = []
-let magnets = []
+let particles = [];
+let magnets = [];
 
-const ParticleComponent = ({ position, args, color, speed, q}) => {
-  let particle = new Particle();
+const ParticleComponent = ({
+  id,
+  position,
+  args,
+  color,
+  speed,
+  q,
+  isPlaying,
+}) => {
+  let particle = new Particle(
+    position[0],
+    position[1],
+    position[2],
+    speed[0],
+    speed[1],
+    speed[2],
+    q
+  );
   particles.push(particle);
   const mesh = useRef(null);
   useFrame(() => {
+    if (isPlaying) {
+      let xF = particle.lorentzFx(0, 0, 1);
+      let yF = particle.lorentzFy(0, 0, 0);
+      let zF = particle.lorentzFz(0, 1, 0);
 
-    let xF = particle.lorentzFx2(0, 0, 1, speed[1], speed[2], q);
-    let yF = particle.lorentzFy2(0, 0, 0, speed[2], speed[0], q);
-    let zF = particle.lorentzFz2(0, 1, 0, speed[0], speed[1], q);
+      // for (var i = 0; i < particles.length; i++) {
+      //   if (particles[i] !== particle) {
+      //     console.log("repulsion function here");
+      //   }
+      // }
 
-    for (var i = 0; i < particles.length; i++){
-      if (particles[i] !== particle){
-        console.log("repulsion function here");
+      speed[0] += xF;
+      speed[1] += yF;
+      speed[2] += zF;
+
+      particle.xV = speed[0];
+      particle.yV = speed[1];
+      particle.zV = speed[2];
+
+      mesh.current.position.x += particle.xV;
+      mesh.current.position.y += particle.yV;
+      mesh.current.position.z += particle.zV;
+
+      particle.x = mesh.current.position.x;
+      particle.y = mesh.current.position.y;
+      particle.z = mesh.current.position.z;
+      // Add force induced by magnets
+      for (var i = 0; i < magnets.length; i++){
+        let mag = magnets[i];
+        let currVelVec = new Vec3d(speed[0], speed[1], speed[2]);
+        let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, q, currVelVec);
+        // console.log("force vec: ");
+        // console.log(forceVec);
       }
+
+      mesh.current.position.x += speed[0];
+      mesh.current.position.y += speed[1];
+      mesh.current.position.z += speed[2];
     }
 
-    speed[0] += xF;
-    speed[1] += yF;
-    speed[2] += zF;
-
-    // Add force induced by magnets
-    for (var i = 0; i < magnets.length; i++){
-      let mag = magnets[i];
-      let currVelVec = new Vec3d(speed[0], speed[1], speed[2]);
-      let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, q, currVelVec);
-      // console.log("force vec: ");
-      // console.log(forceVec);
-    }
-
-    mesh.current.position.x += speed[0];
-    mesh.current.position.y += speed[1];
-    mesh.current.position.z += speed[2];
     return true;
   });
 
@@ -153,33 +184,34 @@ const MagnetComponent = ({ position, phi, tetha, magnitude, args, color}) => {
   );
 };
 
-
 function App() {
-  // useEffect(() => {
-  //   const pane = new tweakpane();
-  //   const guiData = {
-  //     particlesCount: 1,
-  //   };
+  const pane = new Pane();
+  const [guiData, setGuiData] = useState({
+    particlesCount: 2,
+    playing: false,
+  });
 
-  //   const particlesFolder = pane.addFolder({
-  //     title: "Agregar particulas",
-  //   });
-  //   particlesFolder.addInput(guiData, "particlesCount", {
-  //     min: 1,
-  //     max: 20,
-  //     label: "Cantidad",
-  //   });
-  //   particlesFolder
-  //     .addButton({
-  //       title: "Agregar a escena",
-  //     })
-  //     .on("click", () => {
-  //       console.log("Added ", guiData.particlesCount, " particles");
-  //     });
-  //   return () => {
-  //     pane.dispose();
-  //   };
-  // }, []);
+  pane.addInput(guiData, "playing").on("change", function (ev) {
+    setGuiData({ particlesCount: guiData.particlesCount, playing: ev.value });
+  });
+
+  const particlesFolder = pane.addFolder({
+    title: "Agregar particulas",
+    expanded: false,
+  });
+  particlesFolder.addInput(guiData, "particlesCount", {
+    min: 1,
+    max: 20,
+    step: 1,
+    label: "Cantidad",
+  });
+  particlesFolder
+    .addButton({
+      title: "Agregar a escena",
+    })
+    .on("click", () => {
+      console.log("Added ", guiData.particlesCount, " particles");
+    });
   return (
     <>
       <Canvas colorManagement camera={{ position: [-5, 2, 10], fov: 60 }}>
@@ -195,18 +227,22 @@ function App() {
           </mesh>
 
           <ParticleComponent
+            id={1}
             position={[0, 1, 0]}
             args={[0.2, 100, 100]}
             color="lightblue"
             speed={[0.01, 0.01, 0.01]}
             q={0.01}
+            isPlaying={guiData.playing}
           />
           <ParticleComponent
+            id={2}
             position={[2, 1, 0]}
             args={[0.2, 100, 100]}
             color="red"
             speed={[-0.01, 0.01, -0.01]}
-            q={0.01}
+            q={0.02}
+            isPlaying={guiData.playing}
           />
 
           <MagnetComponent
@@ -220,19 +256,18 @@ function App() {
           {/* 
           <ParticleComponent
             position={[-2, 1, 2]}
-            args={[1, 100, 100]}
+            args={[1, 20, 20]}
             color="pink"
             speed={6}
           />
           
           <ParticleComponent
             position={[2, 1, -2]}
-            args={[1, 100, 100]}
+            args={[1, 20, 20]}
             color="pink"
             speed={6}
           />
           */}
-          
         </group>
         <OrbitControls />
       </Canvas>
