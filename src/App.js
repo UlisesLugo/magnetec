@@ -123,17 +123,8 @@ const ParticleComponent = ({
       // Particle Repulsion Loop
       for (var i = 0; i < particles.length; i++) {
         if (i != id) {
-          let ke = 8.988 * Math.pow(10, 9);
-          ke = 1/ke;
-          let pos1 = new Vec3d(particles[id].x, particles[id].y, particles[id].z);
-          let pos2 = new Vec3d(particles[i].x, particles[i].y, particles[i].z);
-          
-          let c2 = pos1.substract(pos2);
-          let mag = c2.magnitude();
-          let mag3 = Math.pow(mag, 3);
-          
-          let force = ke*((particles[id].q * particles[i].q)/mag3);
-          let dir = c2.unit();
+
+          let force = particle[id].getForceVectorAtP(particles[i]);
 
           // Repulsion multiplied because the force is to little to be noticable
           speed[0] += force*dir.vec[0]*10000000000;

@@ -1,5 +1,6 @@
 import Object from './object.js';
 
+const KE = 1/ (8.988 * Math.pow(10, 9));
 export default class Particle extends Object {
     constructor(x, y, z, xV, yV, zV, q) {
         super();
@@ -29,4 +30,17 @@ export default class Particle extends Object {
         return this.q * (zE + (this.xV * yB) - (this.yV * xB));
     }
 
+    getForceVectorAtP(otherP){
+        let pos1 = new Vec3d(this.x, this.y, this.z);
+        let pos2 = new Vec3d(otherP.x, otherP.y, otherP.z);
+        
+        let c2 = pos1.substract(pos2);
+        let mag = c2.magnitude();
+        let mag3 = Math.pow(mag, 3);
+        
+        let force = KE*((this.q * otherP.q)/mag3);
+        let dir = c2.unit();
+
+        return force
+    }
 }
