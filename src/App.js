@@ -10,7 +10,6 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { MeshWobbleMaterial, OrbitControls } from "@react-three/drei";
 import { useSpring, a } from "react-spring/three";
 import { Pane } from "tweakpane";
-import Magnet from "./js/classes/magnet.js";
 
 const prevLogic = () => {
   let scene = new THREE.Scene();
