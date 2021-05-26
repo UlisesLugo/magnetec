@@ -99,37 +99,39 @@ const ParticleComponent = ({
   */
   const mesh = useRef(null);
   useFrame(() => {
+    // console.log("xd");
     if (isPlaying) {
-
+      console.log("isPlaying");
       // Get force applied to the particle with lorentz function for a constant field
       let xF = particles[id].lorentzFx(0, 0, 0);
       let yF = particles[id].lorentzFy(0, 0, 0);
       let zF = particles[id].lorentzFz(0, 0, 0);
 
-      // Add force induced by magnets
-      for (var i = 0; i < magnets.length; i++){
-        let mag = magnets[i];
-        let currVelVec = new Vec3d(speed[0], speed[1], speed[2]);
-        let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, q, currVelVec);
+      // // Add force induced by magnets
+      // for (var i = 0; i < magnets.length; i++){
+      //   let mag = magnets[i];
+      //   let currVelVec = new Vec3d(speed[0], speed[1], speed[2]);
+      //   let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, q, currVelVec);
         
-        // Get force applied to the particle with lorentz function
-        xF += particles[id].lorentzFx(0, forceVec.vec[2], forceVec.vec[1]);
-        yF += particles[id].lorentzFy(0, forceVec.vec[0], forceVec.vec[2]);
-        zF += particles[id].lorentzFz(0, forceVec.vec[1], forceVec.vec[0]);
+      //   // Get force applied to the particle with lorentz function
+      //   xF += particles[id].lorentzFx(0, forceVec.vec[2], forceVec.vec[1]);
+      //   yF += particles[id].lorentzFy(0, forceVec.vec[0], forceVec.vec[2]);
+      //   zF += particles[id].lorentzFz(0, forceVec.vec[1], forceVec.vec[0]);
         
-        //console.log("force vec x: ", forceVec.vec[0], " y: ", forceVec.vec[1], " z: ", forceVec.vec[2]);
-      }
+      //   //console.log("force vec x: ", forceVec.vec[0], " y: ", forceVec.vec[1], " z: ", forceVec.vec[2]);
+      // }
 
       // Particle Repulsion Loop
       for (var i = 0; i < particles.length; i++) {
         if (i != id) {
 
-          let force = particle[id].getForceVectorAtP(particles[i]);
-
+          let force = particles[id].getForceVectorAtP(particles[i]);
+          // console.log("force");
+          // console.log(force);
           // Repulsion multiplied because the force is to little to be noticable
-          speed[0] += force*dir.vec[0]*10000000000;
-          speed[1] += force*dir.vec[1]*10000000000;
-          speed[2] += force*dir.vec[2]*10000000000;
+          speed[0] += force.vec[0]*1e13;
+          speed[1] += force.vec[1]*1e13;
+          speed[2] += force.vec[2]*1e13;
 
           //console.log(speed[0], speed[1], speed[2]);
         }

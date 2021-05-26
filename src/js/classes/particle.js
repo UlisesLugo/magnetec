@@ -1,3 +1,4 @@
+import Vec3d from '../utils/utils.js';
 import Object from './object.js';
 
 const KE = 1/ (8.988 * Math.pow(10, 9));
@@ -41,6 +42,6 @@ export default class Particle extends Object {
         let force = KE*((this.q * otherP.q)/mag3);
         let dir = c2.unit();
 
-        return force
+        return dir.mult(force);
     }
 }
