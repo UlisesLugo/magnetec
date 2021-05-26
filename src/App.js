@@ -98,10 +98,12 @@ const ParticleComponent = ({
   useFrame(() => {
     if (isPlaying) {
 
+      // Get force applied to the particle with lorentz function
       let xF = particles[id].lorentzFx(0, 0, 0);
       let yF = particles[id].lorentzFy(0, 0, 0);
       let zF = particles[id].lorentzFz(0, 0, 0);
 
+      // Particle Repulsion Loop
       for (var i = 0; i < particles.length; i++) {
         if (i != id) {
           let ke = 8.988 * Math.pow(10, 9);
@@ -116,6 +118,7 @@ const ParticleComponent = ({
           let force = ke*((particles[id].q * particles[i].q)/mag3);
           let dir = c2.unit();
 
+          // Repulsion multiplied because the force is to little to be noticable
           speed[0] += force*dir.vec[0]*10000000000;
           speed[1] += force*dir.vec[1]*10000000000;
           speed[2] += force*dir.vec[2]*10000000000;
@@ -124,21 +127,26 @@ const ParticleComponent = ({
         }
       }
 
+      // Update Component speed
       speed[0] += xF;
       speed[1] += yF;
       speed[2] += zF;
     
+      // Update Object speed
       particles[id].xV = speed[0];
       particles[id].yV = speed[1];
       particles[id].zV = speed[2];
 
+      // Update Component position
       mesh.current.position.x += particles[id].xV;
       mesh.current.position.y += particles[id].yV;
       mesh.current.position.z += particles[id].zV;
 
+      // Update Object position
       particles[id].x = mesh.current.position.x;
       particles[id].y = mesh.current.position.y;
       particles[id].z = mesh.current.position.z;
+
       // Add force induced by magnets
       for (var i = 0; i < magnets.length; i++){
         let mag = magnets[i];
@@ -274,21 +282,7 @@ function App() {
             args={[0.2, 100, 100]}
             color="black"
           />
-          {/* 
-          <ParticleComponent
-            position={[-2, 1, 2]}
-            args={[1, 20, 20]}
-            color="pink"
-            speed={6}
-          />
           
-          <ParticleComponent
-            position={[2, 1, -2]}
-            args={[1, 20, 20]}
-            color="pink"
-            speed={6}
-          />
-          */}
         </group>
         <OrbitControls />
       </Canvas>
