@@ -67,6 +67,12 @@ const prevLogic = () => {
 let particles = [];
 let magnets = [];
 
+// Creating the particles outside of the component this should be done when creating the particles
+let particle = new Particle(0, 1, 0, 0.00, 0.00, 0.00, 0.01);
+particles.push(particle);
+particle = new Particle(2, 1, 0, 0.00, 0.00, 0.00, 0.01);
+particles.push(particle);
+
 const ParticleComponent = ({
   id,
   position,
@@ -76,6 +82,7 @@ const ParticleComponent = ({
   q,
   isPlaying,
 }) => {
+  /*
   let particle = new Particle(
     position[0],
     position[1],
@@ -86,34 +93,52 @@ const ParticleComponent = ({
     q
   );
   particles.push(particle);
+  */
   const mesh = useRef(null);
   useFrame(() => {
     if (isPlaying) {
-      let xF = particle.lorentzFx(0, 0, 1);
-      let yF = particle.lorentzFy(0, 0, 0);
-      let zF = particle.lorentzFz(0, 1, 0);
 
-      // for (var i = 0; i < particles.length; i++) {
-      //   if (particles[i] !== particle) {
-      //     console.log("repulsion function here");
-      //   }
-      // }
+      let xF = particles[id].lorentzFx(0, 0, 0);
+      let yF = particles[id].lorentzFy(0, 0, 0);
+      let zF = particles[id].lorentzFz(0, 0, 0);
+
+      for (var i = 0; i < particles.length; i++) {
+        if (i != id) {
+          let ke = 8.988 * Math.pow(10, 9);
+          ke = 1/ke;
+          let pos1 = new Vec3d(particles[id].x, particles[id].y, particles[id].z);
+          let pos2 = new Vec3d(particles[i].x, particles[i].y, particles[i].z);
+          
+          let c2 = pos1.substract(pos2);
+          let mag = c2.magnitude();
+          let mag3 = Math.pow(mag, 3);
+          
+          let force = ke*((particles[id].q * particles[i].q)/mag3);
+          let dir = c2.unit();
+
+          speed[0] += force*dir.vec[0]*10000000000;
+          speed[1] += force*dir.vec[1]*10000000000;
+          speed[2] += force*dir.vec[2]*10000000000;
+
+          console.log(speed[0], speed[1], speed[2]);
+        }
+      }
 
       speed[0] += xF;
       speed[1] += yF;
       speed[2] += zF;
+    
+      particles[id].xV = speed[0];
+      particles[id].yV = speed[1];
+      particles[id].zV = speed[2];
 
-      particle.xV = speed[0];
-      particle.yV = speed[1];
-      particle.zV = speed[2];
+      mesh.current.position.x += particles[id].xV;
+      mesh.current.position.y += particles[id].yV;
+      mesh.current.position.z += particles[id].zV;
 
-      mesh.current.position.x += particle.xV;
-      mesh.current.position.y += particle.yV;
-      mesh.current.position.z += particle.zV;
-
-      particle.x = mesh.current.position.x;
-      particle.y = mesh.current.position.y;
-      particle.z = mesh.current.position.z;
+      particles[id].x = mesh.current.position.x;
+      particles[id].y = mesh.current.position.y;
+      particles[id].z = mesh.current.position.z;
       // Add force induced by magnets
       for (var i = 0; i < magnets.length; i++){
         let mag = magnets[i];
@@ -123,9 +148,6 @@ const ParticleComponent = ({
         // console.log(forceVec);
       }
 
-      mesh.current.position.x += speed[0];
-      mesh.current.position.y += speed[1];
-      mesh.current.position.z += speed[2];
     }
 
     return true;
@@ -226,20 +248,20 @@ function App() {
           </mesh>
 
           <ParticleComponent
-            id={1}
+            id={0}
             position={[0, 1, 0]}
             args={[0.2, 100, 100]}
             color="lightblue"
-            speed={[0.01, 0.01, 0.01]}
+            speed={[0.00, 0.00, 0.00]}
             q={0.01}
             isPlaying={guiData.playing}
           />
           <ParticleComponent
-            id={2}
-            position={[2, 1, 0]}
+            id={1}
+            position={[2, 2, 1]}
             args={[0.2, 100, 100]}
             color="red"
-            speed={[-0.01, 0.01, -0.01]}
+            speed={[0.00, 0.00, 0.00]}
             q={0.02}
             isPlaying={guiData.playing}
           />
