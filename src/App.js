@@ -73,6 +73,9 @@ particles.push(particle);
 particle = new Particle(2, 1, 0, 0.00, 0.00, 0.00, 0.01);
 particles.push(particle);
 
+let magnet = new Magnet(Math.PI, Math.PI, 10000000000000, 1, 2, 1);
+magnets.push(magnet);
+
 const ParticleComponent = ({
   id,
   position,
@@ -98,10 +101,24 @@ const ParticleComponent = ({
   useFrame(() => {
     if (isPlaying) {
 
-      // Get force applied to the particle with lorentz function
+      // Get force applied to the particle with lorentz function for a constant field
       let xF = particles[id].lorentzFx(0, 0, 0);
       let yF = particles[id].lorentzFy(0, 0, 0);
       let zF = particles[id].lorentzFz(0, 0, 0);
+
+      // Add force induced by magnets
+      for (var i = 0; i < magnets.length; i++){
+        let mag = magnets[i];
+        let currVelVec = new Vec3d(speed[0], speed[1], speed[2]);
+        let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, q, currVelVec);
+        
+        // Get force applied to the particle with lorentz function
+        xF += particles[id].lorentzFx(0, forceVec.vec[2], forceVec.vec[1]);
+        yF += particles[id].lorentzFy(0, forceVec.vec[0], forceVec.vec[2]);
+        zF += particles[id].lorentzFz(0, forceVec.vec[1], forceVec.vec[0]);
+        
+        //console.log("force vec x: ", forceVec.vec[0], " y: ", forceVec.vec[1], " z: ", forceVec.vec[2]);
+      }
 
       // Particle Repulsion Loop
       for (var i = 0; i < particles.length; i++) {
@@ -123,7 +140,7 @@ const ParticleComponent = ({
           speed[1] += force*dir.vec[1]*10000000000;
           speed[2] += force*dir.vec[2]*10000000000;
 
-          console.log(speed[0], speed[1], speed[2]);
+          //console.log(speed[0], speed[1], speed[2]);
         }
       }
 
@@ -146,15 +163,6 @@ const ParticleComponent = ({
       particles[id].x = mesh.current.position.x;
       particles[id].y = mesh.current.position.y;
       particles[id].z = mesh.current.position.z;
-
-      // Add force induced by magnets
-      for (var i = 0; i < magnets.length; i++){
-        let mag = magnets[i];
-        let currVelVec = new Vec3d(speed[0], speed[1], speed[2]);
-        let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, q, currVelVec);
-        // console.log("force vec: ");
-        // console.log(forceVec);
-      }
 
     }
 
@@ -187,8 +195,8 @@ const MagnetComponent = ({ position, phi, tetha, magnitude, args, color}) => {
   console.log("tetha: ", tetha);
   console.log("magnitude: ", magnitude);
   let magnet = new Magnet(phi, tetha, magnitude, position[0], position[1], position[2]);
-  console.log(magnet);
-  magnets.push(magnet);
+  //console.log(magnet);
+  //magnets.push(magnet);
   const mesh = useRef(null);
   useFrame(() => {
   });
@@ -277,7 +285,7 @@ function App() {
           <MagnetComponent
             phi={Math.PI}
             tetha={Math.PI} 
-            magnitude={1000}
+            magnitude={10000000000}
             position={[1, 2, 1]}
             args={[0.2, 100, 100]}
             color="black"
