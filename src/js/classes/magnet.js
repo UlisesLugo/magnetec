@@ -1,7 +1,7 @@
 import Vec3d from '../utils/utils.js';
 import Object from './object.js';
 
-const U_NOT = 4 * Math.PI * 1e-7;
+const U_NOT = 4 * Math.PI * 1e-7; // H/m.
 
 class MagneticMomentVector{
     // scheme: https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/3D_Spherical.svg/1200px-3D_Spherical.svg.png
@@ -13,6 +13,7 @@ class MagneticMomentVector{
     setStartPosition(x, y, z){
         this.startPos = new Vec3d(x, y, z);
     }
+
     setPhiTethaMagnitude(phi, tetha, magnitude){
         this.phi = phi; 
         this.tetha = tetha;
@@ -22,15 +23,18 @@ class MagneticMomentVector{
     getVectorEndPosition(){
         let x = this.magnitude * Math.cos(this.tetha) * Math.sin(this.phi);
         let y = this.magnitude * Math.sin(this.tetha) * Math.sin(this.phi);
-        let z = this.magnitude * Math.cos(this.tetha);
-        return new Vec3d(x, y, z);
+        let z = this.magnitude * Math.cos(this.phi);
+        // update end of vector since spherical coordinates are relative to the start of it
+        let end_pos = (new Vec3d(x, y, z)).add(this.startPos);
+        return end_pos;
     }
 
     magneticFieldAtP(x, y, z){
-        let r = (new Vec3d(x, y, z)).substract(this.startPos);
-        let m = this.getVectorPointPosition()
+        // let r = (new Vec3d(x, y, z)).substract(this.startPos);
+        let r = (new Vec3d(x, y, z))
+        let m = this.getVectorEndPosition()
         
-        let scalar = U_NOT/(4*Math.PI) * 1 / Math.pow(r.magnitude(), 3);
+        let scalar = (U_NOT/(4*Math.PI)) * (1 / Math.pow(r.magnitude(), 3));
         let magnetic = r.unit().mult(3*m.dotProd(r.unit())).substract(m);
         magnetic = magnetic.mult(scalar);
         return magnetic;

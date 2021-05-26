@@ -18,8 +18,9 @@ export default class Vec3d{
         return Math.sqrt(x1*x1 + y1*y1 + z1*z1);
     }
     unit(){
-        let [x1, y1, z1] = this.vec;
         let mag = this.magnitude();
+        if(mag === 0) return new Vec3d(0, 0, 0);
+        let [x1, y1, z1] = this.vec;
         return new Vec3d(x1/mag, y1/mag, z1/mag);
     }
     substract(b){

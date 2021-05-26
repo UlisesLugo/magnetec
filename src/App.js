@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { useEffect, useRef, useState } from "react";
 import Particle from "./js/classes/particle.js";
 import Magnet from "./js/classes/magnet.js";
+import Vec3d from './js/utils/utils.js';
 import tweakpane from "tweakpane";
 
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -85,6 +86,15 @@ const ParticleComponent = ({ position, args, color, speed, q}) => {
     speed[1] += yF;
     speed[2] += zF;
 
+    // Add force induced by magnets
+    for (var i = 0; i < magnets.length; i++){
+      let mag = magnets[i];
+      let currVelVec = new Vec3d(speed[0], speed[1], speed[2]);
+      let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, q, currVelVec);
+      // console.log("force vec: ");
+      // console.log(forceVec);
+    }
+
     mesh.current.position.x += speed[0];
     mesh.current.position.y += speed[1];
     mesh.current.position.z += speed[2];
@@ -111,30 +121,16 @@ const ParticleComponent = ({ position, args, color, speed, q}) => {
   );
 };
 
-const MagnetComponent = ({ position, args, color}) => {
-  let magnet = new Magnet();
+const MagnetComponent = ({ position, phi, tetha, magnitude, args, color}) => {
+  console.log("creating magnet");
+  console.log("phi: ", phi);
+  console.log("tetha: ", tetha);
+  console.log("magnitude: ", magnitude);
+  let magnet = new Magnet(phi, tetha, magnitude, position[0], position[1], position[2]);
+  console.log(magnet);
   magnets.push(magnet);
   const mesh = useRef(null);
   useFrame(() => {
-
-  //   let xF = particle.lorentzFx2(0, 0, 1, speed[1], speed[2], q);
-  //   let yF = particle.lorentzFy2(0, 0, 0, speed[2], speed[0], q);
-  //   let zF = particle.lorentzFz2(0, 1, 0, speed[0], speed[1], q);
-
-  //   for (var i = 0; i < particles.length; i++){
-  //     if (particles[i] !== particle){
-  //       console.log("repulsion function here");
-  //     }
-  //   }
-
-  //   speed[0] += xF;
-  //   speed[1] += yF;
-  //   speed[2] += zF;
-
-  //   mesh.current.position.x += speed[0];
-  //   mesh.current.position.y += speed[1];
-  //   mesh.current.position.z += speed[2];
-  //   return true;
   });
 
   const [expand, setExpand] = useState(false);
@@ -214,7 +210,10 @@ function App() {
           />
 
           <MagnetComponent
-            position={[2, 1, 0]}
+            phi={Math.PI}
+            tetha={Math.PI} 
+            magnitude={1000}
+            position={[1, 2, 1]}
             args={[0.2, 100, 100]}
             color="black"
           />
