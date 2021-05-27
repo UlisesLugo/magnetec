@@ -40,7 +40,7 @@ const ParticleComponent = ({
       let zF = particles[id].lorentzFz(0, 0, 0);
 
       // Add force induced by magnets
-      for (var i = 0; i < Object.keys(magnets).length; i++) {
+      for (let i = 0; i < magnets.length; i++) {
         let mag = magnets[i];
         let currVelVec = new Vec3d(
           particles[id].xV,
@@ -70,7 +70,7 @@ const ParticleComponent = ({
         );
       }
 
-      for (var i = 0; i < Object.keys(particles).length; i++) {
+      for (let i = 0; i < particles.length; i++) {
         if (i != id) {
           let force = particles[id].getForceVectorAtP(particles[i]);
           // Repulsion multiplied because the force is to little to be noticable
@@ -101,9 +101,9 @@ const ParticleComponent = ({
       mesh.current.position.z += particles[id].zV;
 
       count_particles++;
-      if (count_particles == Object.keys(particles).length) {
+      if (count_particles == particles.length) {
         count_particles = 0;
-        for (let i = 0; i < Object.keys(particles).length; i++) {
+        for (let i = 0; i < particles.length; i++) {
           particles[i].x = particles[i].mesh.current.position.x;
           particles[i].y = particles[i].mesh.current.position.y;
           particles[i].z = particles[i].mesh.current.position.z;
@@ -222,10 +222,10 @@ function App() {
   useEffect(() => {
     let particle1 = new Particle(1, 0, 0, -0.001, 0, 0, -0.1, false);
     let particle2 = new Particle(-1, 0, 0, 0.001, 0, 0, 0.1, false);
-    setParticles({ 0: particle1, 1: particle2 });
+    setParticles([particle1, particle2]);
 
     let magnet = new Magnet(Math.PI / 2, Math.PI / 2, 10, 0, -5, 0);
-    setMagnets({ 0: magnet });
+    setMagnets([magnet]);
   }, []);
   // Creating the particles outside of the component this should be done when creating the particles
 
@@ -237,18 +237,14 @@ function App() {
     title: "Agregar particulas",
     expanded: false,
   });
-  particlesFolder.addInput(guiData, "particlesCount", {
-    min: 1,
-    max: 20,
-    step: 1,
-    label: "Cantidad",
-  });
   particlesFolder
     .addButton({
-      title: "Agregar a escena",
+      title: "Agregar una particula",
     })
     .on("click", () => {
+      // TODO random location in particle to add
       console.log("Added ", guiData.particlesCount, " particles");
+      setGuiData({ ...guiData, particlesCount: guiData.particlesCount + 1 });
     });
   const selectedParticleFolder = pane.addFolder({
     title: "Editar Particula Seleccionada",
