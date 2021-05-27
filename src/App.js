@@ -23,8 +23,6 @@ const ParticleComponent = ({
   q,
   particles,
   magnets,
-  epochParticles,
-  setEpochParticles,
   guiData,
   setGuiData,
 }) => {
@@ -185,6 +183,23 @@ const MagnetComponent = ({ id, position, args, color }) => {
   );
 };
 
+const ParticlesList = ({ particles, guiData, setGuiData, magnets }) => {
+  return particles?.map((particle, index) => (
+    <ParticleComponent
+      id={index}
+      position={[particle.x, particle.y, particle.z]}
+      args={[0.2, 100, 100]}
+      color="lightblue"
+      // speed={[0.00, 0.00, 0.00]}
+      q={particle.q}
+      particles={particles}
+      magnets={magnets}
+      guiData={guiData}
+      setGuiData={setGuiData}
+    />
+  ));
+};
+
 function App() {
   const pane = new Pane();
   const [guiData, setGuiData] = useState({
@@ -194,30 +209,6 @@ function App() {
   });
   const [particles, setParticles] = useState();
   const [magnets, setMagnets] = useState();
-  const [epochParticles, setepochParticles] = useState(0);
-
-  useEffect(() => {
-    const tabs = document.getElementsByClassName("tp-fldv_t");
-    let tab;
-    for (let i = 0; i < tabs.length; i++) {
-      if (tabs[i].textContent.includes("Editar Particula")) {
-        tab = tabs[i];
-        break;
-      }
-    }
-    // Try to click on tab not working :(
-    // if (particles) {
-    //   for (let i = 0; i < Object.keys(particles).length; i++) {
-    //     if (particles[i].isSelected) {
-    //       timer = setTimeout(() => {
-    //         tab.click();
-    //       }, 500);
-    //       break;
-    //     }
-    //   }
-    // }
-    // return () => clearTimeout(timer);
-  }, [guiData]);
 
   useEffect(() => {
     let particle1 = new Particle(1, 0, 0, -0.001, 0, 0, -0.1, false);
@@ -235,7 +226,7 @@ function App() {
 
   const particlesFolder = pane.addFolder({
     title: "Agregar particulas",
-    expanded: false,
+    expanded: true,
   });
   particlesFolder
     .addButton({
@@ -243,6 +234,18 @@ function App() {
     })
     .on("click", () => {
       // TODO random location in particle to add
+      const new_particle = new Particle(
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1,
+        -0.001,
+        0,
+        0,
+        0,
+        1,
+        false
+      );
+      setParticles([...particles, new_particle]);
       console.log("Added ", guiData.particlesCount, " particles");
       setGuiData({ ...guiData, particlesCount: guiData.particlesCount + 1 });
     });
@@ -269,32 +272,10 @@ function App() {
             <meshStandardMaterial attach="material" color="lightgray" />
           </mesh>
 
-          <ParticleComponent
-            id={0}
-            position={[1, 0, 0]}
-            args={[0.2, 100, 100]}
-            color="lightblue"
-            // speed={[0.00, 0.00, 0.00]}
-            q={0.01}
-            particles={particles}
-            magnets={magnets}
-            epochParticles={epochParticles}
-            setEpochParticles={setepochParticles}
+          <ParticlesList
             guiData={guiData}
-            setGuiData={setGuiData}
-          />
-          <ParticleComponent
-            id={1}
-            position={[-1, 0, 0]}
-            args={[0.2, 100, 100]}
-            color="red"
-            // speed={[0.00, 0.00, 0.00]}
-            q={0.01}
-            particles={particles}
             magnets={magnets}
-            epochParticles={epochParticles}
-            setEpochParticles={setepochParticles}
-            guiData={guiData}
+            particles={particles}
             setGuiData={setGuiData}
           />
 
