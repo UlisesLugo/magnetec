@@ -26,6 +26,7 @@ const ParticleComponent = ({
   epochParticles,
   setEpochParticles,
   guiData,
+  setGuiData,
 }) => {
   const mesh = useRef(null);
   useFrame(() => {
@@ -121,7 +122,24 @@ const ParticleComponent = ({
 
   const handleClick = () => {
     setExpand(!expand);
-    console.log("Selected particle #", id);
+    if (!particles[id].isSelected) {
+      for (let i = 0; i < Object.keys(particles).length; i++) {
+        particles[i].isSelected = false;
+      }
+      particles[id].isSelected = true;
+      console.log("Selected particle #", id);
+      setGuiData((prevState) => ({
+        ...prevState,
+        currParticle: {
+          x: particles[id].x,
+          y: particles[id].y,
+          z: particles[id].z,
+        },
+      }));
+    } else {
+      console.log("Unselected id #", id);
+      particles[id].isSelected = false;
+    }
   };
 
   return (
@@ -172,13 +190,34 @@ function App() {
   const [guiData, setGuiData] = useState({
     particlesCount: 2,
     playing: false,
-    selectedPosX: 0,
-    selectedPosY: 0,
-    selectedPosZ: 0,
+    currParticle: { x: 0, y: 0, z: 0 },
   });
   const [particles, setParticles] = useState();
   const [magnets, setMagnets] = useState();
   const [epochParticles, setepochParticles] = useState(0);
+
+  useEffect(() => {
+    const tabs = document.getElementsByClassName("tp-fldv_t");
+    let tab;
+    for (let i = 0; i < tabs.length; i++) {
+      if (tabs[i].textContent.includes("Editar Particula")) {
+        tab = tabs[i];
+        break;
+      }
+    }
+    // Try to click on tab not working :(
+    // if (particles) {
+    //   for (let i = 0; i < Object.keys(particles).length; i++) {
+    //     if (particles[i].isSelected) {
+    //       timer = setTimeout(() => {
+    //         tab.click();
+    //       }, 500);
+    //       break;
+    //     }
+    //   }
+    // }
+    // return () => clearTimeout(timer);
+  }, [guiData]);
 
   useEffect(() => {
     let particle1 = new Particle(1, 0, 0, -0.001, 0, 0, -0.1, false);
@@ -191,7 +230,7 @@ function App() {
   // Creating the particles outside of the component this should be done when creating the particles
 
   pane.addInput(guiData, "playing").on("change", function (ev) {
-    setGuiData({ particlesCount: guiData.particlesCount, playing: ev.value });
+    setGuiData({ ...guiData, playing: ev.value });
   });
 
   const particlesFolder = pane.addFolder({
@@ -211,6 +250,15 @@ function App() {
     .on("click", () => {
       console.log("Added ", guiData.particlesCount, " particles");
     });
+  const selectedParticleFolder = pane.addFolder({
+    title: "Editar Particula Seleccionada",
+    expanded: false,
+  });
+  selectedParticleFolder.addInput(guiData, "currParticle", {
+    min: -50,
+    max: 50,
+    label: "Posiciones",
+  });
   return (
     <>
       <Canvas colorManagement camera={{ position: [-5, 2, 10], fov: 60 }}>
@@ -237,6 +285,7 @@ function App() {
             epochParticles={epochParticles}
             setEpochParticles={setepochParticles}
             guiData={guiData}
+            setGuiData={setGuiData}
           />
           <ParticleComponent
             id={1}
@@ -250,6 +299,7 @@ function App() {
             epochParticles={epochParticles}
             setEpochParticles={setepochParticles}
             guiData={guiData}
+            setGuiData={setGuiData}
           />
 
           <MagnetComponent
