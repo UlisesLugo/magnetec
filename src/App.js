@@ -233,7 +233,7 @@ function App() {
       title: "Agregar una particula",
     })
     .on("click", () => {
-      // TODO random location in particle to add
+      // TODO Check random attributes
       const new_particle = new Particle(
         Math.random() * 2 - 1,
         Math.random() * 2 - 1,
