@@ -241,8 +241,7 @@ function App() {
         -0.001,
         0,
         0,
-        0,
-        1,
+        0.01,
         false
       );
       setParticles([...particles, new_particle]);
