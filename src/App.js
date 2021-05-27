@@ -287,6 +287,7 @@ function App() {
           />
         </group>
         <OrbitControls />
+        <axesHelper />
       </Canvas>
     </>
   );
