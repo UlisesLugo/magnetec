@@ -38,7 +38,6 @@ const ParticleComponent = ({
       let yF = particles[id].lorentzFy(0, 0, 0);
       let zF = particles[id].lorentzFz(0, 0, 0);
       
-      /*
       // Add force induced by magnets
       for (var i = 0; i < Object.keys(magnets).length; i++){
         let mag = magnets[i];
@@ -46,22 +45,21 @@ const ParticleComponent = ({
         let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, particles[id].q, currVelVec);
         
         // Get force applied to the particle with lorentz function
-        xF += forceVec.vec[0]*1e8;
-        yF += forceVec.vec[1]*1e8;
-        zF += forceVec.vec[2]*1e8;
+        xF += forceVec.vec[0]*1e7;
+        yF += forceVec.vec[1]*1e7;
+        zF += forceVec.vec[2]*1e7;
         
         console.log("force vec x: ", forceVec.vec[0], " y: ", forceVec.vec[1], " z: ", forceVec.vec[2]);
       }
-      */
 
       for (var i = 0; i < Object.keys(particles).length; i++) {
         if (i != id) {
           let force = particles[id].getForceVectorAtP(particles[i]);
           // Repulsion multiplied because the force is to little to be noticable
           
-          xF += force.vec[0]*1e11;
-          yF += force.vec[1]*1e11;
-          zF += force.vec[2]*1e11;
+          xF += force.vec[0]*1e8;
+          yF += force.vec[1]*1e8;
+          zF += force.vec[2]*1e8;
           if(print_i % 30 == 0 || print_i % 30 == 1) console.log("force in particle ", id, force.vec[0]*1e11, force.vec[1]*1e11, force.vec[2]*1e11);
           print_i ++;
         }
@@ -147,11 +145,11 @@ function App() {
   const [epochParticles, setepochParticles] = useState(0)
 
   useEffect(() => {
-    let particle1 = new Particle(1, 0, 0, 0, 0, 0, -0.01);
-    let particle2 = new Particle(-1, 0, 0, 0, 0, 0, 0.01);
+    let particle1 = new Particle(1, 0, 0, -0.001, 0, 0, -0.1);
+    let particle2 = new Particle(-1, 0, 0, 0.001, 0, 0, 0.1);
     setParticles({0: particle1, 1: particle2});
   
-    let magnet = new Magnet(Math.PI, Math.PI, 1, 1, 2, 1);
+    let magnet = new Magnet(Math.PI/2, Math.PI/2, 10, 0, -5, 0);
     setMagnets({0: magnet});
   }, []);
   // Creating the particles outside of the component this should be done when creating the particles
@@ -219,7 +217,7 @@ function App() {
           />
 
           <MagnetComponent
-            position={[1, 2, 1]}
+            position={[0, -5, 0]}
             args={[0.2, 100, 100]}
             color="black"
           />
