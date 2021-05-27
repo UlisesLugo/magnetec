@@ -11,152 +11,81 @@ import { MeshWobbleMaterial, OrbitControls } from "@react-three/drei";
 import { useSpring, a } from "react-spring/three";
 import { Pane } from "tweakpane";
 
-const prevLogic = () => {
-  let scene = new THREE.Scene();
-  let camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  let renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  // document.body.appendChild( renderer.domElement );
-  // use ref as a mount point of the Three.js scene instead of the document.body
-  // document.body.appendChild(renderer.domElement);
-  //let geometry = new THREE.SphereGeometry(1);
-  //let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-  //let cube = new THREE.Mesh(geometry, material);
-  //scene.add(cube);
-
-  /////// TEST PARTICLE /////////
-  const geometry = new THREE.SphereGeometry(0.1, 100, 100);
-  const material = new THREE.MeshBasicMaterial({
-    color: "gray",
-    wireframe: false,
-    side: THREE.DoubleSide,
-  });
-  let particle = new Particle(geometry, material);
-  let meshParticle = particle.object;
-  meshParticle.position.y = 0;
-  scene.add(meshParticle);
-  ///////////////////////////////
-
-  camera.position.z = 5;
-  let animate = function () {
-    requestAnimationFrame(animate);
-
-    // Using lorentz function to calculate forces in x, y and z.
-    // Simulating the change in velocity by adding the force directly to the velocity.
-    particle.xV += particle.lorentzFx(0, 0, 10);
-    particle.yV += particle.lorentzFy(0.001, 0, 0);
-    particle.zV += particle.lorentzFz(0, 10, 0);
-
-    // Changing particle position
-    particle.setPosition(
-      particle.getXPosition() + particle.xV,
-      particle.getYPosition() + particle.yV,
-      particle.getZPosition() + particle.zV
-    );
-
-    renderer.render(scene, camera);
-  };
-  animate();
-};
-
-let particles = [];
-let magnets = [];
-
-// Creating the particles outside of the component this should be done when creating the particles
-let particle = new Particle(0, 1, 0, 0.00, 0.00, 0.00, 0.01);
-particles.push(particle);
-particle = new Particle(2, 1, 0, 0.00, 0.00, 0.00, 0.01);
-particles.push(particle);
-
-let magnet = new Magnet(Math.PI, Math.PI, 10000000000000, 1, 2, 1);
-magnets.push(magnet);
+let print_i = 0;
+let count_particles = 0;
 
 const ParticleComponent = ({
   id,
   position,
   args,
   color,
-  speed,
+  //speed,
   q,
   isPlaying,
+  particles,
+  magnets,
+  epochParticles,
+  setEpochParticles
 }) => {
-  /*
-  let particle = new Particle(
-    position[0],
-    position[1],
-    position[2],
-    speed[0],
-    speed[1],
-    speed[2],
-    q
-  );
-  particles.push(particle);
-  */
   const mesh = useRef(null);
   useFrame(() => {
-    // console.log("xd");
+    particles[id].mesh = mesh;
     if (isPlaying) {
       console.log("isPlaying");
+
       // Get force applied to the particle with lorentz function for a constant field
       let xF = particles[id].lorentzFx(0, 0, 0);
       let yF = particles[id].lorentzFy(0, 0, 0);
       let zF = particles[id].lorentzFz(0, 0, 0);
-
-      // // Add force induced by magnets
-      // for (var i = 0; i < magnets.length; i++){
-      //   let mag = magnets[i];
-      //   let currVelVec = new Vec3d(speed[0], speed[1], speed[2]);
-      //   let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, q, currVelVec);
+      
+      /*
+      // Add force induced by magnets
+      for (var i = 0; i < Object.keys(magnets).length; i++){
+        let mag = magnets[i];
+        let currVelVec = new Vec3d(particles[id].xV, particles[id].yV, particles[id].zV);
+        let forceVec = mag.getForceVectorAtPosition(mesh.current.position.x, mesh.current.position.y, mesh.current.position.z, particles[id].q, currVelVec);
         
-      //   // Get force applied to the particle with lorentz function
-      //   xF += particles[id].lorentzFx(0, forceVec.vec[2], forceVec.vec[1]);
-      //   yF += particles[id].lorentzFy(0, forceVec.vec[0], forceVec.vec[2]);
-      //   zF += particles[id].lorentzFz(0, forceVec.vec[1], forceVec.vec[0]);
+        // Get force applied to the particle with lorentz function
+        xF += forceVec.vec[0]*1e8;
+        yF += forceVec.vec[1]*1e8;
+        zF += forceVec.vec[2]*1e8;
         
-      //   //console.log("force vec x: ", forceVec.vec[0], " y: ", forceVec.vec[1], " z: ", forceVec.vec[2]);
-      // }
+        console.log("force vec x: ", forceVec.vec[0], " y: ", forceVec.vec[1], " z: ", forceVec.vec[2]);
+      }
+      */
 
-      // Particle Repulsion Loop
-      for (var i = 0; i < particles.length; i++) {
+      for (var i = 0; i < Object.keys(particles).length; i++) {
         if (i != id) {
-
           let force = particles[id].getForceVectorAtP(particles[i]);
-          // console.log("force");
-          // console.log(force);
           // Repulsion multiplied because the force is to little to be noticable
-          speed[0] += force.vec[0]*1e13;
-          speed[1] += force.vec[1]*1e13;
-          speed[2] += force.vec[2]*1e13;
-
-          //console.log(speed[0], speed[1], speed[2]);
+          
+          xF += force.vec[0]*1e11;
+          yF += force.vec[1]*1e11;
+          zF += force.vec[2]*1e11;
+          if(print_i % 30 == 0 || print_i % 30 == 1) console.log("force in particle ", id, force.vec[0]*1e11, force.vec[1]*1e11, force.vec[2]*1e11);
+          print_i ++;
         }
       }
-
-      // Update Component speed
-      speed[0] += xF;
-      speed[1] += yF;
-      speed[2] += zF;
     
       // Update Object speed
-      particles[id].xV = speed[0];
-      particles[id].yV = speed[1];
-      particles[id].zV = speed[2];
+      particles[id].xV += xF;
+      particles[id].yV += yF;
+      particles[id].zV += zF;
 
       // Update Component position
       mesh.current.position.x += particles[id].xV;
       mesh.current.position.y += particles[id].yV;
       mesh.current.position.z += particles[id].zV;
-
-      // Update Object position
-      particles[id].x = mesh.current.position.x;
-      particles[id].y = mesh.current.position.y;
-      particles[id].z = mesh.current.position.z;
-
+      
+      count_particles ++;
+      if(count_particles == Object.keys(particles).length){
+        count_particles = 0;
+        for(let i = 0; i < Object.keys(particles).length; i++){
+          particles[i].x = particles[i].mesh.current.position.x;
+          particles[i].y = particles[i].mesh.current.position.y;
+          particles[i].z = particles[i].mesh.current.position.z;
+        }
+      }
     }
 
     return true;
@@ -182,14 +111,7 @@ const ParticleComponent = ({
   );
 };
 
-const MagnetComponent = ({ position, phi, tetha, magnitude, args, color}) => {
-  console.log("creating magnet");
-  console.log("phi: ", phi);
-  console.log("tetha: ", tetha);
-  console.log("magnitude: ", magnitude);
-  let magnet = new Magnet(phi, tetha, magnitude, position[0], position[1], position[2]);
-  //console.log(magnet);
-  //magnets.push(magnet);
+const MagnetComponent = ({position, args, color}) => {
   const mesh = useRef(null);
   useFrame(() => {
   });
@@ -220,6 +142,19 @@ function App() {
     particlesCount: 2,
     playing: false,
   });
+  const [particles, setParticles] = useState()
+  const [magnets, setMagnets] = useState()
+  const [epochParticles, setepochParticles] = useState(0)
+
+  useEffect(() => {
+    let particle1 = new Particle(1, 0, 0, 0, 0, 0, -0.01);
+    let particle2 = new Particle(-1, 0, 0, 0, 0, 0, 0.01);
+    setParticles({0: particle1, 1: particle2});
+  
+    let magnet = new Magnet(Math.PI, Math.PI, 1, 1, 2, 1);
+    setMagnets({0: magnet});
+  }, []);
+  // Creating the particles outside of the component this should be done when creating the particles
 
   pane.addInput(guiData, "playing").on("change", function (ev) {
     setGuiData({ particlesCount: guiData.particlesCount, playing: ev.value });
@@ -258,27 +193,32 @@ function App() {
 
           <ParticleComponent
             id={0}
-            position={[0, 1, 0]}
+            position={[1, 0, 0]}
             args={[0.2, 100, 100]}
             color="lightblue"
-            speed={[0.00, 0.00, 0.00]}
+            // speed={[0.00, 0.00, 0.00]}
             q={0.01}
             isPlaying={guiData.playing}
+            particles={particles}
+            magnets={magnets}
+            epochParticles={epochParticles}
+            setEpochParticles={setepochParticles}
           />
           <ParticleComponent
             id={1}
-            position={[2, 2, 1]}
+            position={[-1, 0, 0]}
             args={[0.2, 100, 100]}
             color="red"
-            speed={[0.00, 0.00, 0.00]}
-            q={0.02}
+            // speed={[0.00, 0.00, 0.00]}
+            q={0.01}
             isPlaying={guiData.playing}
+            particles={particles}
+            magnets={magnets}
+            epochParticles={epochParticles}
+            setEpochParticles={setepochParticles}
           />
 
           <MagnetComponent
-            phi={Math.PI}
-            tetha={Math.PI} 
-            magnitude={10000000000}
             position={[1, 2, 1]}
             args={[0.2, 100, 100]}
             color="black"

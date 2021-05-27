@@ -8,6 +8,8 @@ class MagneticMomentVector{
     constructor(phi, tetha, magnitude, x, y, z){
         this.setPhiTethaMagnitude(phi, tetha, magnitude);
         this.setStartPosition(x, y, z);
+        console.log('magnet');
+        console.log(this);
     }
 
     setStartPosition(x, y, z){
@@ -31,8 +33,8 @@ class MagneticMomentVector{
 
     magneticFieldAtP(x, y, z){
         // let r = (new Vec3d(x, y, z)).substract(this.startPos);
-        let r = (new Vec3d(x, y, z))
-        let m = this.getVectorEndPosition()
+        let r = (new Vec3d(x, y, z)).substract(this.startPos);
+        let m = this.getVectorEndPosition().substract(this.startPos);
         
         let scalar = (U_NOT/(4*Math.PI)) * (1 / Math.pow(r.magnitude(), 3));
         let magnetic = r.unit().mult(3*m.dotProd(r.unit())).substract(m);
