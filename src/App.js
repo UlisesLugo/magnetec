@@ -75,9 +75,9 @@ const ParticleComponent = ({
       print_i++;
 
       // Update Object speed
-      particles[id].xV = particles[id].xV * 0.99 + xF;
-      particles[id].yV = particles[id].yV * 0.99 + yF;
-      particles[id].zV = particles[id].zV * 0.99 + zF;
+      particles[id].xV = particles[id].xV * 0.9 + xF;
+      particles[id].yV = particles[id].yV * 0.9 + yF;
+      particles[id].zV = particles[id].zV * 0.9 + zF;
 
       let speedVec = new Vec3d(particles[id].xV, particles[id].yV, particles[id].zV);
       if (speedVec.magnitude() > PART_RAD/2){
@@ -264,7 +264,7 @@ function App() {
   useEffect(() => {
     let parts = []
     for (let i = 0; i < 5; i++){
-      let charge = 0.5*1e-9;
+      let charge = 0.3*1e-9;
       if (Math.random() >= 0.5) charge*=-1;
       parts.push(new Particle(Math.random()*3-1.5, Math.random()*3-1.5, Math.random()*3-1.5, 0, 0, 0, charge, false));
     }
@@ -279,7 +279,7 @@ function App() {
     //   mags.push(new Magnet(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, 0.01, Math.random()*20-10,  Math.random()*20-10, Math.random()*20-10));
     // }
 
-    let magnet = new Magnet(Math.PI / 2, Math.PI / 2, 0.01, 0, 0, 0);
+    let magnet = new Magnet(Math.PI / 2, Math.PI / 2, 0.03, 0, 0, 0);
     mags.push(magnet);
     // let magnet2 = new Magnet(Math.PI / 2, Math.PI / 2, 0.01, 1, 2, 3);
     // mags.push(magnet2);
