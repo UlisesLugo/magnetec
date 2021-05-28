@@ -2,6 +2,7 @@ import Vec3d from '../utils/utils.js';
 import Object from './object.js';
 
 const U_NOT = 4 * Math.PI * 1e-7; // H/m.
+const NM_MULT = 1e-9;
 
 class MagneticMomentVector{
     // scheme: https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/3D_Spherical.svg/1200px-3D_Spherical.svg.png
@@ -33,8 +34,8 @@ class MagneticMomentVector{
 
     magneticFieldAtP(x, y, z){
         // let r = (new Vec3d(x, y, z)).substract(this.startPos);
-        let r = (new Vec3d(x, y, z)).substract(this.startPos);
-        let m = this.getVectorEndPosition().substract(this.startPos);
+        let r = (new Vec3d(x, y, z)).substract(this.startPos).mult(NM_MULT);
+        let m = this.getVectorEndPosition().substract(this.startPos).mult(NM_MULT);
         
         let scalar = (U_NOT/(4*Math.PI)) * (1 / Math.pow(r.magnitude(), 3));
         let magnetic = r.unit().mult(3*m.dotProd(r.unit())).substract(m);

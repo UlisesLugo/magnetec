@@ -55,9 +55,9 @@ const ParticleComponent = ({
         );
 
         // Get force applied to the particle with lorentz function
-        xF += forceVec.vec[0] * 1e7;
-        yF += forceVec.vec[1] * 1e7;
-        zF += forceVec.vec[2] * 1e7;
+        xF += forceVec.vec[0];
+        yF += forceVec.vec[1];
+        zF += forceVec.vec[2];
         if (print_i % 30 == 0 || print_i % 30 == 1){
           console.log(
             "force vec for {",id,"} x: ",
@@ -72,19 +72,29 @@ const ParticleComponent = ({
 
       for (let i = 0; i < particles.length; i++) {
         if (i != id) {
+          let dist = new Vec3d(
+            particles[id].x - particles[i].x,
+            particles[id].y - particles[i].y,
+            particles[id].z - particles[i].z).magnitude();
+          if (dist <= PART_RAD*2){
+            particles[id].xV = 0;
+            particles[id].yV = 0;
+            particles[id].zV = 0;
+            continue;
+          }
           let force = particles[id].getForceVectorAtP(particles[i]);
           // Repulsion multiplied because the force is to little to be noticable
           
-          xF += force.vec[0] * 1e8;
-          yF += force.vec[1] * 1e8;
-          zF += force.vec[2] * 1e8;
+          xF += force.vec[0];
+          yF += force.vec[1];
+          zF += force.vec[2];
           if (print_i % 30 == 0 || print_i % 30 == 1){
             console.log(
               "force in particle ",
               id,
-              force.vec[0] * 1e11,
-              force.vec[1] * 1e11,
-              force.vec[2] * 1e11
+              force.vec[0],
+              force.vec[1],
+              force.vec[2]
             );  
           }
         }
@@ -92,9 +102,17 @@ const ParticleComponent = ({
       print_i++;
 
       // Update Object speed
-      particles[id].xV = particles[id].xV * 0.9999 + xF;
-      particles[id].yV = particles[id].yV * 0.9999 + yF;
-      particles[id].zV = particles[id].zV * 0.9999 + zF;
+      particles[id].xV = particles[id].xV * 0.99 + xF;
+      particles[id].yV = particles[id].yV * 0.99 + yF;
+      particles[id].zV = particles[id].zV * 0.99 + zF;
+
+      let speedVec = new Vec3d(particles[id].xV, particles[id].yV, particles[id].zV);
+      if (speedVec.magnitude() > PART_RAD/2){
+        speedVec = speedVec.unit().mult(PART_RAD/2);
+        particles[id].xV = speedVec.vec[0];
+        particles[id].yV = speedVec.vec[1];
+        particles[id].zV = speedVec.vec[2];
+      }
 
       // Update Component position
       mesh.current.position.x += particles[id].xV;
@@ -217,12 +235,28 @@ function App() {
   const [magnets, setMagnets] = useState();
 
   useEffect(() => {
-    let particle1 = new Particle(3, 0, 0, -0.01, 0, 0, -0.1, false);
-    let particle2 = new Particle(-3, 0, 0, 0.01, 0, 0, 0.1, false);
-    setParticles([particle1, particle2]);
+    let parts = []
+    for (let i = 0; i < 5; i++){
+      let charge = 0.5*1e-9;
+      if (Math.random() >= 0.5) charge*=-1;
+      parts.push(new Particle(Math.random()*3-1.5, Math.random()*3-1.5, Math.random()*3-1.5, 0, 0, 0, charge, false));
+    }
+    // let particle1 = new Particle(2, 0, 0, 0, 0, 0, -0.5*1e-9, false);
+    // let particle2 = new Particle(-2, 0, 0, 0, 0, 0, 0.5*1e-9, false);
+    // parts = [particle1, particle2];
+    // let particle3 = new Particle(1, 0, 2, 0, 0, 0, 0.5*1e-12, false);
+    setParticles(parts);
 
-    let magnet = new Magnet(Math.PI / 2, Math.PI / 2, 10, 0, 0, 0);
-    setMagnets([magnet]);
+    let mags = []
+    // for (let i = 0; i < 50; i++){
+    //   mags.push(new Magnet(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, 0.01, Math.random()*20-10,  Math.random()*20-10, Math.random()*20-10));
+    // }
+
+    let magnet = new Magnet(Math.PI / 2, Math.PI / 2, 0.01, 0, 0, 0);
+    mags.push(magnet);
+    // let magnet2 = new Magnet(Math.PI / 2, Math.PI / 2, 0.01, 1, 2, 3);
+    // mags.push(magnet2);
+    setMagnets(mags);
   }, []);
   // Creating the particles outside of the component this should be done when creating the particles
 

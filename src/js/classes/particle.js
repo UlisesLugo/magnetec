@@ -2,6 +2,8 @@ import Vec3d from "../utils/utils.js";
 import Object from "./object.js";
 
 const KE = 1 / (8.988 * Math.pow(10, 9));
+const NM_MULT = 1e-9;
+
 export default class Particle extends Object {
   constructor(x, y, z, xV, yV, zV, q, isSelected) {
     super();
@@ -33,8 +35,8 @@ export default class Particle extends Object {
   }
 
   getForceVectorAtP(otherP) {
-    let pos1 = new Vec3d(this.x, this.y, this.z);
-    let pos2 = new Vec3d(otherP.x, otherP.y, otherP.z);
+    let pos1 = new Vec3d(this.x, this.y, this.z).mult(NM_MULT);
+    let pos2 = new Vec3d(otherP.x, otherP.y, otherP.z).mult(NM_MULT);
 
     let c2 = pos1.substract(pos2);
     let mag = c2.magnitude();
