@@ -128,11 +128,10 @@ const ParticleComponent = ({
       console.log("Selected particle #", id);
       setGuiData((prevState) => ({
         ...prevState,
-        currParticle: {
-          x: particles[id].x,
-          y: particles[id].y,
-          z: particles[id].z,
-        },
+        currParticleX: particles[id].x,
+        currParticleY: particles[id].y,
+        currParticleZ: particles[id].z,
+        currId: id,
       }));
     } else {
       console.log("Unselected id #", id);
@@ -186,6 +185,7 @@ const MagnetComponent = ({ id, position, args, color }) => {
 const ParticlesList = ({ particles, guiData, setGuiData, magnets }) => {
   return particles?.map((particle, index) => (
     <ParticleComponent
+      key={index}
       id={index}
       position={[particle.x, particle.y, particle.z]}
       args={[0.2, 100, 100]}
@@ -205,7 +205,10 @@ function App() {
   const [guiData, setGuiData] = useState({
     particlesCount: 2,
     playing: false,
-    currParticle: { x: 0, y: 0, z: 0 },
+    currParticleX: 0,
+    currParticleY: 0,
+    currParticleZ: 0,
+    currId: -1,
   });
   const [particles, setParticles] = useState();
   const [magnets, setMagnets] = useState();
@@ -252,11 +255,48 @@ function App() {
     title: "Editar Particula Seleccionada",
     expanded: false,
   });
-  selectedParticleFolder.addInput(guiData, "currParticle", {
-    min: -50,
-    max: 50,
-    label: "Posiciones",
-  });
+  selectedParticleFolder
+    .addInput(guiData, "currParticleX", {
+      min: -50,
+      max: 50,
+      label: "PosX",
+    })
+    .on("change", (ev) => {
+      setParticles((prevState) => {
+        return prevState.map((value, key) =>
+          key === guiData.currId ? { ...value, x: ev.value } : value
+        );
+      });
+      // console.log("Changed X to", ev.value);
+    });
+  selectedParticleFolder
+    .addInput(guiData, "currParticleY", {
+      min: -50,
+      max: 50,
+      label: "PosY",
+    })
+    .on("change", (ev) => {
+      setParticles((prevState) => {
+        return prevState.map((value, key) =>
+          key === guiData.currId ? { ...value, y: ev.value } : value
+        );
+      });
+      // console.log("Changed X to", ev.value);
+    });
+  selectedParticleFolder
+    .addInput(guiData, "currParticleZ", {
+      min: -50,
+      max: 50,
+      label: "PosZ",
+    })
+    .on("change", (ev) => {
+      setParticles((prevState) => {
+        return prevState.map((value, key) =>
+          key === guiData.currId ? { ...value, z: ev.value } : value
+        );
+      });
+      // console.log("Changed X to", ev.value);
+    });
   return (
     <>
       <Canvas colorManagement camera={{ position: [-5, 2, 10], fov: 60 }}>
