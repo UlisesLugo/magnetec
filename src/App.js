@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Particle from "./js/classes/particle.js";
 import Magnet from "./js/classes/magnet.js";
 import Vec3d from "./js/utils/utils.js";
-import tweakpane from "tweakpane";
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { MeshWobbleMaterial, OrbitControls } from "@react-three/drei";
@@ -19,8 +18,6 @@ const ParticleComponent = ({
   position,
   args,
   color,
-  //speed,
-  q,
   particles,
   magnets,
   guiData,
@@ -131,6 +128,7 @@ const ParticleComponent = ({
         currParticleX: particles[id].x,
         currParticleY: particles[id].y,
         currParticleZ: particles[id].z,
+        currParticleQ: particles[id].q,
         currId: id,
       }));
     } else {
@@ -208,6 +206,7 @@ function App() {
     currParticleX: 0,
     currParticleY: 0,
     currParticleZ: 0,
+    currParticleQ: 0.1,
     currId: -1,
   });
   const [particles, setParticles] = useState();
@@ -270,7 +269,6 @@ function App() {
           return value;
         });
       });
-      // console.log("Changed X to", ev.value);
     });
   selectedParticleFolder
     .addInput(guiData, "currParticleY", {
@@ -280,11 +278,13 @@ function App() {
     })
     .on("change", (ev) => {
       setParticles((prevState) => {
-        return prevState.map((value, key) =>
-          key === guiData.currId ? { ...value, y: ev.value } : value
-        );
+        return prevState.map((value, key) => {
+          if (key === guiData.currId) {
+            value.y = ev.value;
+          }
+          return value;
+        });
       });
-      // console.log("Changed X to", ev.value);
     });
   selectedParticleFolder
     .addInput(guiData, "currParticleZ", {
@@ -294,11 +294,30 @@ function App() {
     })
     .on("change", (ev) => {
       setParticles((prevState) => {
-        return prevState.map((value, key) =>
-          key === guiData.currId ? { ...value, z: ev.value } : value
-        );
+        return prevState.map((value, key) => {
+          if (key === guiData.currId) {
+            value.z = ev.value;
+          }
+          return value;
+        });
       });
-      // console.log("Changed X to", ev.value);
+    });
+  selectedParticleFolder
+    .addInput(guiData, "currParticleQ", {
+      min: -0.1,
+      max: 0.1,
+      label: "Carga (microcoulombs)",
+      step: 0.001,
+    })
+    .on("change", (ev) => {
+      setParticles((prevState) => {
+        return prevState.map((value, key) => {
+          if (key === guiData.currId) {
+            value.q = ev.value;
+          }
+          return value;
+        });
+      });
     });
   return (
     <>
