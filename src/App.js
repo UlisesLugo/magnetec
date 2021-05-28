@@ -13,6 +13,7 @@ import { Pane } from "tweakpane";
 
 let print_i = 0;
 let count_particles = 0;
+const PART_RAD = 0.2;
 
 const ParticleComponent = ({
   id,
@@ -30,12 +31,12 @@ const ParticleComponent = ({
   useFrame(() => {
     particles[id].mesh = mesh;
     if (guiData.playing) {
-      console.log("isPlaying");
+      // console.log("isPlaying");
 
       // Get force applied to the particle with lorentz function for a constant field
-      let xF = particles[id].lorentzFx(0, 0, 0);
-      let yF = particles[id].lorentzFy(0, 0, 0);
-      let zF = particles[id].lorentzFz(0, 0, 0);
+      let xF = 0;
+      let yF = 0;
+      let zF = 0;
 
       // Add force induced by magnets
       for (let i = 0; i < magnets.length; i++) {
@@ -57,41 +58,43 @@ const ParticleComponent = ({
         xF += forceVec.vec[0] * 1e7;
         yF += forceVec.vec[1] * 1e7;
         zF += forceVec.vec[2] * 1e7;
-
-        console.log(
-          "force vec x: ",
-          forceVec.vec[0],
-          " y: ",
-          forceVec.vec[1],
-          " z: ",
-          forceVec.vec[2]
-        );
+        if (print_i % 30 == 0 || print_i % 30 == 1){
+          console.log(
+            "force vec for {",id,"} x: ",
+            forceVec.vec[0],
+            " y: ",
+            forceVec.vec[1],
+            " z: ",
+            forceVec.vec[2]
+          );
+        }
       }
 
       for (let i = 0; i < particles.length; i++) {
         if (i != id) {
           let force = particles[id].getForceVectorAtP(particles[i]);
           // Repulsion multiplied because the force is to little to be noticable
-
+          
           xF += force.vec[0] * 1e8;
           yF += force.vec[1] * 1e8;
           zF += force.vec[2] * 1e8;
-          if (print_i % 30 == 0 || print_i % 30 == 1)
+          if (print_i % 30 == 0 || print_i % 30 == 1){
             console.log(
               "force in particle ",
               id,
               force.vec[0] * 1e11,
               force.vec[1] * 1e11,
               force.vec[2] * 1e11
-            );
-          print_i++;
+            );  
+          }
         }
       }
+      print_i++;
 
       // Update Object speed
-      particles[id].xV += xF;
-      particles[id].yV += yF;
-      particles[id].zV += zF;
+      particles[id].xV = particles[id].xV * 0.9999 + xF;
+      particles[id].yV = particles[id].yV * 0.9999 + yF;
+      particles[id].zV = particles[id].zV * 0.9999 + zF;
 
       // Update Component position
       mesh.current.position.x += particles[id].xV;
@@ -211,11 +214,11 @@ function App() {
   const [magnets, setMagnets] = useState();
 
   useEffect(() => {
-    let particle1 = new Particle(1, 0, 0, -0.001, 0, 0, -0.1, false);
-    let particle2 = new Particle(-1, 0, 0, 0.001, 0, 0, 0.1, false);
+    let particle1 = new Particle(3, 0, 0, -0.01, 0, 0, -0.1, false);
+    let particle2 = new Particle(-3, 0, 0, 0.01, 0, 0, 0.1, false);
     setParticles([particle1, particle2]);
 
-    let magnet = new Magnet(Math.PI / 2, Math.PI / 2, 10, 0, -5, 0);
+    let magnet = new Magnet(Math.PI / 2, Math.PI / 2, 10, 0, 0, 0);
     setMagnets([magnet]);
   }, []);
   // Creating the particles outside of the component this should be done when creating the particles
@@ -281,7 +284,7 @@ function App() {
 
           <MagnetComponent
             id={0}
-            position={[0, -5, 0]}
+            position={[0, 0, 0]}
             args={[0.2, 100, 100]}
             color="black"
           />
