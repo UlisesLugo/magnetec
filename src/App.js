@@ -263,9 +263,12 @@ function App() {
     })
     .on("change", (ev) => {
       setParticles((prevState) => {
-        return prevState.map((value, key) =>
-          key === guiData.currId ? { ...value, x: ev.value } : value
-        );
+        return prevState.map((value, key) => {
+          if (key === guiData.currId) {
+            value.x = ev.value;
+          }
+          return value;
+        });
       });
       // console.log("Changed X to", ev.value);
     });
