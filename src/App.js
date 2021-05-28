@@ -129,7 +129,7 @@ const ParticleComponent = ({
         currParticleY: particles[id].y,
         currParticleZ: particles[id].z,
         currParticleQ: particles[id].q,
-        currId: id,
+        currParticleId: id,
       }));
     } else {
       console.log("Unselected id #", id);
@@ -207,7 +207,7 @@ function App() {
     currParticleY: 0,
     currParticleZ: 0,
     currParticleQ: 0.1,
-    currId: -1,
+    currParticleId: -1,
   });
   const [particles, setParticles] = useState();
   const [magnets, setMagnets] = useState();
@@ -263,7 +263,7 @@ function App() {
     .on("change", (ev) => {
       setParticles((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currId) {
+          if (key === guiData.currParticleId) {
             value.x = ev.value;
           }
           return value;
@@ -279,7 +279,7 @@ function App() {
     .on("change", (ev) => {
       setParticles((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currId) {
+          if (key === guiData.currParticleId) {
             value.y = ev.value;
           }
           return value;
@@ -295,7 +295,7 @@ function App() {
     .on("change", (ev) => {
       setParticles((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currId) {
+          if (key === guiData.currParticleId) {
             value.z = ev.value;
           }
           return value;
@@ -312,7 +312,7 @@ function App() {
     .on("change", (ev) => {
       setParticles((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currId) {
+          if (key === guiData.currParticleId) {
             value.q = ev.value;
           }
           return value;
