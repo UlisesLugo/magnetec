@@ -397,10 +397,10 @@ function App() {
       label: "PosX",
     })
     .on("change", (ev) => {
-      setParticles((prevState) => {
+      setMagnets((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currParticleId) {
-            value.x = ev.value;
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.startPos.vec[0] = ev.value;
           }
           return value;
         });
@@ -413,10 +413,10 @@ function App() {
       label: "PosY",
     })
     .on("change", (ev) => {
-      setParticles((prevState) => {
+      setMagnets((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currParticleId) {
-            value.y = ev.value;
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.startPos.vec[1] = ev.value;
           }
           return value;
         });
@@ -429,10 +429,10 @@ function App() {
       label: "PosZ",
     })
     .on("change", (ev) => {
-      setParticles((prevState) => {
+      setMagnets((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currParticleId) {
-            value.z = ev.value;
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.startPos.vec[2] = ev.value;
           }
           return value;
         });
@@ -446,10 +446,10 @@ function App() {
       step: 0.1,
     })
     .on("change", (ev) => {
-      setParticles((prevState) => {
+      setMagnets((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currParticleId) {
-            value.q = ev.value;
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.phi = ev.value;
           }
           return value;
         });
@@ -463,10 +463,10 @@ function App() {
       step: 0.1,
     })
     .on("change", (ev) => {
-      setParticles((prevState) => {
+      setMagnets((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currParticleId) {
-            value.q = ev.value;
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.tetha = ev.value;
           }
           return value;
         });
@@ -480,10 +480,10 @@ function App() {
       step: 0.001,
     })
     .on("change", (ev) => {
-      setParticles((prevState) => {
+      setMagnets((prevState) => {
         return prevState.map((value, key) => {
-          if (key === guiData.currParticleId) {
-            value.q = ev.value;
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.magnitude = ev.value;
           }
           return value;
         });
