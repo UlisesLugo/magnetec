@@ -5,7 +5,6 @@ const KE = 1 / (8.988 * Math.pow(10, 9));
 export default class Particle extends Object {
   constructor(x, y, z, xV, yV, zV, q, isSelected) {
     super();
-    console.log("this is a particle");
     this.x = x;
     this.y = y;
     this.z = z;
