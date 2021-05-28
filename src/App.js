@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Particle from "./js/classes/particle.js";
 import Magnet from "./js/classes/magnet.js";
 import Vec3d from "./js/utils/utils.js";
-import tweakpane from "tweakpane";
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { MeshWobbleMaterial, OrbitControls } from "@react-three/drei";
@@ -20,8 +19,6 @@ const ParticleComponent = ({
   position,
   args,
   color,
-  //speed,
-  q,
   particles,
   magnets,
   guiData,
@@ -31,8 +28,6 @@ const ParticleComponent = ({
   useFrame(() => {
     particles[id].mesh = mesh;
     if (guiData.playing) {
-      // console.log("isPlaying");
-
       // Get force applied to the particle with lorentz function for a constant field
       let xF = 0;
       let yF = 0;
@@ -54,20 +49,9 @@ const ParticleComponent = ({
           currVelVec
         );
 
-        // Get force applied to the particle with lorentz function
         xF += forceVec.vec[0];
         yF += forceVec.vec[1];
         zF += forceVec.vec[2];
-        if (print_i % 30 == 0 || print_i % 30 == 1){
-          console.log(
-            "force vec for {",id,"} x: ",
-            forceVec.vec[0],
-            " y: ",
-            forceVec.vec[1],
-            " z: ",
-            forceVec.vec[2]
-          );
-        }
       }
 
       for (let i = 0; i < particles.length; i++) {
@@ -83,20 +67,9 @@ const ParticleComponent = ({
             continue;
           }
           let force = particles[id].getForceVectorAtP(particles[i]);
-          // Repulsion multiplied because the force is to little to be noticable
-          
           xF += force.vec[0];
           yF += force.vec[1];
           zF += force.vec[2];
-          if (print_i % 30 == 0 || print_i % 30 == 1){
-            console.log(
-              "force in particle ",
-              id,
-              force.vec[0],
-              force.vec[1],
-              force.vec[2]
-            );  
-          }
         }
       }
       print_i++;
@@ -152,7 +125,8 @@ const ParticleComponent = ({
         currParticleX: particles[id].x,
         currParticleY: particles[id].y,
         currParticleZ: particles[id].z,
-        currId: id,
+        currParticleQ: particles[id].q,
+        currParticleId: id,
       }));
     } else {
       console.log("Unselected id #", id);
@@ -174,7 +148,14 @@ const ParticleComponent = ({
   );
 };
 
-const MagnetComponent = ({ id, position, args, color }) => {
+const MagnetComponent = ({
+  id,
+  position,
+  args,
+  color,
+  magnets,
+  setGuiData,
+}) => {
   const mesh = useRef(null);
   useFrame(() => {});
 
@@ -186,7 +167,26 @@ const MagnetComponent = ({ id, position, args, color }) => {
 
   const handleClick = () => {
     setExpand(!expand);
-    console.log("Selected magnet #", id);
+    if (!magnets[id].isSelected) {
+      for (let i = 0; i < magnets.length; i++) {
+        magnets[i].isSelected = false;
+      }
+      magnets[id].isSelected = true;
+      console.log("Selected particle #", magnets[id]);
+      setGuiData((prevState) => ({
+        ...prevState,
+        currMagnetX: magnets[id].magneticMomentVector.startPos.vec[0],
+        currMagnetY: magnets[id].magneticMomentVector.startPos.vec[1],
+        currMagnetZ: magnets[id].magneticMomentVector.startPos.vec[2],
+        currMagnetPhi: magnets[id].magneticMomentVector.phi,
+        currMagnetTetha: magnets[id].magneticMomentVector.tetha,
+        currMagnetMagnitude: magnets[id].magneticMomentVector.magnitude,
+        currMagnetId: id,
+      }));
+    } else {
+      console.log("Unselected id #", id);
+      magnets[id].isSelected = false;
+    }
   };
 
   return (
@@ -221,15 +221,42 @@ const ParticlesList = ({ particles, guiData, setGuiData, magnets }) => {
   ));
 };
 
+const MagnetsList = ({ magnets, setGuiData }) => {
+  return magnets?.map((magnet, index) => {
+    let x = magnet.magneticMomentVector.startPos.vec[0];
+    let y = magnet.magneticMomentVector.startPos.vec[1];
+    let z = magnet.magneticMomentVector.startPos.vec[2];
+    return (
+      <MagnetComponent
+        id={index}
+        position={[x, y, z]}
+        args={[0.2, 100, 100]}
+        color="black"
+        magnets={magnets}
+        setGuiData={setGuiData}
+      />
+    );
+  });
+};
+
 function App() {
   const pane = new Pane();
   const [guiData, setGuiData] = useState({
     particlesCount: 2,
+    magnetsCount: 1,
     playing: false,
     currParticleX: 0,
     currParticleY: 0,
     currParticleZ: 0,
-    currId: -1,
+    currParticleQ: 0.1,
+    currParticleId: -1,
+    currMagnetX: 0,
+    currMagnetY: 0,
+    currMagnetZ: 0,
+    currMagnetPhi: 0.1,
+    currMagnetTetha: 0.1,
+    currMagnetMagnitude: 0.1,
+    currMagnetId: -1,
   });
   const [particles, setParticles] = useState();
   const [magnets, setMagnets] = useState();
@@ -264,7 +291,11 @@ function App() {
     setGuiData({ ...guiData, playing: ev.value });
   });
 
-  const particlesFolder = pane.addFolder({
+  const particlesSection = pane.addFolder({
+    title: "Particulas",
+    expanded: true,
+  });
+  const particlesFolder = particlesSection.addFolder({
     title: "Agregar particulas",
     expanded: true,
   });
@@ -288,9 +319,9 @@ function App() {
       console.log("Added ", guiData.particlesCount, " particles");
       setGuiData({ ...guiData, particlesCount: guiData.particlesCount + 1 });
     });
-  const selectedParticleFolder = pane.addFolder({
+  const selectedParticleFolder = particlesSection.addFolder({
     title: "Editar Particula Seleccionada",
-    expanded: false,
+    expanded: true,
   });
   selectedParticleFolder
     .addInput(guiData, "currParticleX", {
@@ -300,11 +331,13 @@ function App() {
     })
     .on("change", (ev) => {
       setParticles((prevState) => {
-        return prevState.map((value, key) =>
-          key === guiData.currId ? { ...value, x: ev.value } : value
-        );
+        return prevState.map((value, key) => {
+          if (key === guiData.currParticleId) {
+            value.x = ev.value;
+          }
+          return value;
+        });
       });
-      // console.log("Changed X to", ev.value);
     });
   selectedParticleFolder
     .addInput(guiData, "currParticleY", {
@@ -314,11 +347,13 @@ function App() {
     })
     .on("change", (ev) => {
       setParticles((prevState) => {
-        return prevState.map((value, key) =>
-          key === guiData.currId ? { ...value, y: ev.value } : value
-        );
+        return prevState.map((value, key) => {
+          if (key === guiData.currParticleId) {
+            value.y = ev.value;
+          }
+          return value;
+        });
       });
-      // console.log("Changed X to", ev.value);
     });
   selectedParticleFolder
     .addInput(guiData, "currParticleZ", {
@@ -328,11 +363,163 @@ function App() {
     })
     .on("change", (ev) => {
       setParticles((prevState) => {
-        return prevState.map((value, key) =>
-          key === guiData.currId ? { ...value, z: ev.value } : value
-        );
+        return prevState.map((value, key) => {
+          if (key === guiData.currParticleId) {
+            value.z = ev.value;
+          }
+          return value;
+        });
       });
-      // console.log("Changed X to", ev.value);
+    });
+  selectedParticleFolder
+    .addInput(guiData, "currParticleQ", {
+      min: -0.1,
+      max: 0.1,
+      label: "Carga (microcoulombs)",
+      step: 0.001,
+    })
+    .on("change", (ev) => {
+      setParticles((prevState) => {
+        return prevState.map((value, key) => {
+          if (key === guiData.currParticleId) {
+            value.q = ev.value;
+          }
+          return value;
+        });
+      });
+    });
+
+  ////////////////////////////////////////
+  // GUI MAGNET SECTION
+  ////////////////////////////////////////
+  const magnetSection = pane.addFolder({
+    title: "Imanes",
+    expanded: true,
+  });
+  const magnetsFolder = magnetSection.addFolder({
+    title: "Agregar imanes",
+    expanded: true,
+  });
+  magnetsFolder
+    .addButton({
+      title: "Agregar un imán",
+    })
+    .on("click", () => {
+      // TODO Check random attributes
+      const new_magnet = new Magnet(
+        Math.PI / 2,
+        Math.PI / 2,
+        10,
+        Math.random() * 6 - 3,
+        Math.random() * 6 - 3,
+        Math.random() * 6 - 3,
+        false
+      );
+      setMagnets([...magnets, new_magnet]);
+      setGuiData({ ...guiData, magnetsCount: guiData.magnetsCount + 1 });
+    });
+  const selectedMagnetFolder = magnetSection.addFolder({
+    title: "Editar Imán Seleccionada",
+    expanded: true,
+  });
+  selectedMagnetFolder
+    .addInput(guiData, "currMagnetX", {
+      min: -50,
+      max: 50,
+      label: "PosX",
+    })
+    .on("change", (ev) => {
+      setMagnets((prevState) => {
+        return prevState.map((value, key) => {
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.startPos.vec[0] = ev.value;
+          }
+          return value;
+        });
+      });
+    });
+  selectedMagnetFolder
+    .addInput(guiData, "currMagnetY", {
+      min: -50,
+      max: 50,
+      label: "PosY",
+    })
+    .on("change", (ev) => {
+      setMagnets((prevState) => {
+        return prevState.map((value, key) => {
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.startPos.vec[1] = ev.value;
+          }
+          return value;
+        });
+      });
+    });
+  selectedMagnetFolder
+    .addInput(guiData, "currMagnetZ", {
+      min: -50,
+      max: 50,
+      label: "PosZ",
+    })
+    .on("change", (ev) => {
+      setMagnets((prevState) => {
+        return prevState.map((value, key) => {
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.startPos.vec[2] = ev.value;
+          }
+          return value;
+        });
+      });
+    });
+  selectedMagnetFolder
+    .addInput(guiData, "currMagnetPhi", {
+      min: 0,
+      max: Math.PI * 2,
+      label: "Phi",
+      step: 0.1,
+    })
+    .on("change", (ev) => {
+      setMagnets((prevState) => {
+        return prevState.map((value, key) => {
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.phi = ev.value;
+          }
+          return value;
+        });
+      });
+    });
+  selectedMagnetFolder
+    .addInput(guiData, "currMagnetTetha", {
+      min: 0,
+      max: Math.PI * 2,
+      label: "Tetha",
+      step: 0.1,
+    })
+    .on("change", (ev) => {
+      setMagnets((prevState) => {
+        return prevState.map((value, key) => {
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.tetha = ev.value;
+          }
+          return value;
+        });
+      });
+    });
+  selectedMagnetFolder
+    .addInput(guiData, "currMagnetMagnitude", {
+      min: 0,
+      max: 0.05,
+      label: "Magnitud",
+      step: 0.001,
+    })
+    .on("change", (ev) => {
+      setMagnets((prevState) => {
+        return prevState.map((value, key) => {
+          if (key === guiData.currMagnetId) {
+            value.magneticMomentVector.magnitude = ev.value;
+          }
+          return value;
+        });
+      });
     });
   return (
     <>
@@ -355,12 +542,7 @@ function App() {
             setGuiData={setGuiData}
           />
 
-          <MagnetComponent
-            id={0}
-            position={[0, 0, 0]}
-            args={[0.2, 100, 100]}
-            color="black"
-          />
+          <MagnetsList magnets={magnets} setGuiData={setGuiData} />
         </group>
         <OrbitControls />
         <axesHelper />

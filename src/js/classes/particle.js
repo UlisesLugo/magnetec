@@ -7,7 +7,6 @@ const NM_MULT = 1e-9;
 export default class Particle extends Object {
   constructor(x, y, z, xV, yV, zV, q, isSelected) {
     super();
-    console.log("this is a particle");
     this.x = x;
     this.y = y;
     this.z = z;
